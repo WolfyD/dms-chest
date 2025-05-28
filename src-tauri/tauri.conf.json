@@ -30,6 +30,17 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com",
+      "wix": {
+        "language": "en-US",
+        "template": null,
+        "componentRefs": [],
+        "upgradeCode": "18159995-d8f5-4883-8d5d-977c3c9b7b74"
+      }
+    }
   }
 }

@@ -16,8 +16,11 @@
     "@tauri-apps/api": "^2.5.0",
     "@tauri-apps/plugin-opener": "^2",
     "@types/sqlite3": "^3.1.11",
+    "compromise": "^14.14.4",
+    "natural": "^8.1.0",
     "remixicon": "^4.6.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "tracery-grammar": "^2.8.4"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
