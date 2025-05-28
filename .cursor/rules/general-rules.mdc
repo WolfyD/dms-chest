@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Rules to live by
+
+## List Implementation
+When implementing a list of items:
+1. Implement each item in the list
+2. When implementation appears complete, recheck the entire list
+3. If any items are found not implemented, implement them
+4. Repeat rechecking until all items are confirmed done
+
+## Feature Completeness
+Ensure complete implementation of features across all relevant files:
+1. Verify implementation in all relevant JavaScript files
+2. Check CSS files for consistent styling
+3. Ensure all components are in place (JS, CSS, HTML, IPC, events)
+4. Proactively check related files
+5. Maintain consistent implementation across similar features
+6. Check preload.js for new IPC channels when adding communication
+
+## Question Response Protocol
+When user asks a question:
+1. First understand what the user is asking
+2. Provide a direct answer to their question
+3. Only proceed with implementation if explicitly requested
+4. If unsure about the question, ask for clarification
+
