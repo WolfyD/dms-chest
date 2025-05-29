@@ -11,6 +11,13 @@ export class MigrationManager {
     }
 
     public registerMigration(migration: Migration) {
+        // Check for duplicate versions
+        const existingMigration = this.migrations.find(m => m.version === migration.version);
+        if (existingMigration) {
+            throw new Error(`Duplicate migration version ${migration.version} detected. ` +
+                `Existing migration: ${existingMigration.description}, ` +
+                `New migration: ${migration.description}`);
+        }
         this.migrations.push(migration);
     }
 

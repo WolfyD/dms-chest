@@ -9,3 +9,10 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .cursor/rules/*
+
+src-tauri/target
+src-tauri/node_modules
+src-tauri/dist
+src-tauri/build
+
+/_misc/*

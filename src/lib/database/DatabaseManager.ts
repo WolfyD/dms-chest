@@ -1,7 +1,9 @@
 import { Database } from 'sqlite3';
 import { MigrationManager } from './migrations/MigrationManager';
 import { BaseEntity } from './entities/BaseEntity';
-import { CreateCampaignsTable } from './migrations/001_CreateCampaignsTable';
+import { CreateCampaignsTable } from './migrations/001_CreateInitialTables';
+import { CreateImportantTables } from './migrations/002_CreateImportantTables';
+import { CreateCustomTables } from './migrations/003_CreateCustomTables';
 
 export class DatabaseManager {
     private static instance: DatabaseManager;
@@ -29,6 +31,8 @@ export class DatabaseManager {
     private registerMigrations(): void {
         // Register all migrations here
         this.migrationManager.registerMigration(new CreateCampaignsTable());
+        this.migrationManager.registerMigration(new CreateImportantTables());
+        this.migrationManager.registerMigration(new CreateCustomTables());
     }
 
     public async initialize(): Promise<void> {
