@@ -4,6 +4,9 @@ use std::sync::Mutex;
 use tauri::State;
 use std::error::Error;
 use std::fmt;
+use std::path::PathBuf;
+
+mod migrations;
 
 #[derive(Debug)]
 pub enum DatabaseError {
@@ -39,8 +42,9 @@ pub struct Migration {
 }
 
 pub fn init_database() -> SqliteResult<Connection> {
-    let conn = Connection::open("dms-chest.db")?;
-    
+    let db_path = PathBuf::from("dms-chest.db");
+    let conn = Connection::open(db_path)?;
+
     // Create migrations table if it doesn't exist
     conn.execute(
         "CREATE TABLE IF NOT EXISTS migrations (
@@ -50,7 +54,7 @@ pub fn init_database() -> SqliteResult<Connection> {
         )",
         [],
     )?;
-
+    
     Ok(conn)
 }
 
@@ -83,7 +87,7 @@ fn get_pending_migrations(conn: &Connection) -> Result<Vec<Migration>, DatabaseE
     .collect::<SqliteResult<Vec<i32>>>()?;
 
     // Get all available migrations
-    let available_migrations = get_available_migrations()?;
+    let available_migrations = migrations::get_all_migrations();
     
     // Filter out already applied migrations
     let pending_migrations: Vec<Migration> = available_migrations
@@ -94,35 +98,22 @@ fn get_pending_migrations(conn: &Connection) -> Result<Vec<Migration>, DatabaseE
     Ok(pending_migrations)
 }
 
-fn get_available_migrations() -> Result<Vec<Migration>, DatabaseError> {
-    // TODO: In a real application, you would load these from files or a module
-    // For now, we'll return a hardcoded list
-    Ok(vec![
-        Migration {
-            version: 1,
-            description: "Create campaigns table".to_string(),
-            up_sql: "
-                CREATE TABLE IF NOT EXISTS campaigns (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    description TEXT,
-                    settings TEXT,
-                    created_at TIMESTAMP NOT NULL,
-                    updated_at TIMESTAMP NOT NULL,
-                    deleted_at TIMESTAMP
-                )
-            ".to_string(),
-            down_sql: "DROP TABLE IF EXISTS campaigns".to_string(),
-        }
-    ])
-}
-
 fn apply_migration(conn: &mut Connection, migration: &Migration) -> Result<(), DatabaseError> {
-    // Start a transaction
+    println!("Applying migration: {}", migration.description);
+
     let tx = conn.transaction()?;
 
-    // Execute the migration
-    tx.execute(&migration.up_sql, [])?;
+    // Execute the migration using execute_batch for multiple statements
+    tx.execute_batch(&migration.up_sql)?;
+
+    // If the migration fails, log the error
+    if let Err(e) = tx.commit() {
+        println!("Migration failed: {}", e);
+    } else {
+        println!("Migration applied successfully: {}", migration.description);
+    }
+
+    let tx = conn.transaction()?;
 
     // Record the migration
     tx.execute(

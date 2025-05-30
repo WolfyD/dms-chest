@@ -19,4 +19,4 @@ export async function closeDatabase(): Promise<void> {
     if (!isInitialized) return;
     isInitialized = false;
     console.log('Database closed successfully');
-} 
+}
