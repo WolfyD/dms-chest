@@ -16,3 +16,4 @@ src-tauri/dist
 src-tauri/build
 
 /_misc/*
+src-tauri/dms-chest.db
