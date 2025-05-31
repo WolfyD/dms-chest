@@ -3,13 +3,14 @@
 
 mod database;
 
-use database::{get_database_state, initialize_database};
+use database::{get_database_state, initialize_database, create_world};
 
 fn main() {
     tauri::Builder::default()
         .manage(get_database_state())
         .invoke_handler(tauri::generate_handler![
             initialize_database,
+            create_world,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

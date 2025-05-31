@@ -129,4 +129,59 @@ fn apply_migration(conn: &mut Connection, migration: &Migration) -> Result<(), D
 
 pub fn get_database_state() -> DatabaseState {
     DatabaseState(Mutex::new(init_database().expect("Failed to initialize database")))
+}
+
+#[tauri::command]
+pub async fn create_world(state: State<'_, DatabaseState>, world_data: serde_json::Value) -> Result<(), String> {
+    let mut conn = state.0.lock()
+        .map_err(|_| DatabaseError::LockError("Failed to acquire database lock".to_string()))
+        .map_err(|e| e.to_string())?;
+
+    let tx = conn.transaction()
+        .map_err(|e| e.to_string())?;
+
+    // Insert into worlds table
+    let world_id = tx.execute(
+        "INSERT INTO worlds (name, description, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+        params![
+            world_data["name"].as_str().unwrap_or(""),
+            world_data["description"].as_str().unwrap_or("")
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+
+    // Insert into world_details table
+    tx.execute(
+        "INSERT INTO world_details (
+            world_id, genre, tone, tech_level, magic_level,
+            dominant_species, other_species, religions, pantheon,
+            continents, major_nations, notable_landmarks,
+            history, planar_structure, calendar_info, established_material,
+            created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+        params![
+            world_id,
+            world_data["genre"].as_str().unwrap_or("Fantasy"),
+            world_data["tone"].as_str().unwrap_or("Mixed"),
+            world_data["techLevel"].as_str().unwrap_or("Medieval"),
+            world_data["magicLevel"].as_str().unwrap_or("Low"),
+            world_data["dominantSpecies"].as_str().unwrap_or("[]"),
+            world_data["otherSpecies"].as_str().unwrap_or("[]"),
+            world_data["religions"].as_str().unwrap_or("[]"),
+            world_data["pantheon"].as_str().unwrap_or("[]"),
+            world_data["continents"].as_str().unwrap_or("[]"),
+            world_data["majorNations"].as_str().unwrap_or("[]"),
+            world_data["notableLandmarks"].as_str().unwrap_or("[]"),
+            world_data["history"].as_str().unwrap_or(""),
+            world_data["planarStructure"].as_str().unwrap_or("Material Plane"),
+            world_data["calendarInfo"].as_str().unwrap_or(""),
+            world_data["establishedMaterial"].as_str().unwrap_or("")
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+
+    tx.commit()
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 } 

@@ -61,3 +61,71 @@ export function initHeightAdjustment(): () => void {
     };
 }
 
+/**
+ * Opens a tool
+ * @param tool - The tool to open
+ */
+export function openTool(tool: string) {
+    switch (tool) {
+        case "world-generator":
+            // Create a new window
+            const width = 1000;
+            const height = 800;
+            const left = (window.screen.width - width) / 2;
+            const top = (window.screen.height - height) / 2;
+
+            const toolWindow_world_generator = window.open(
+                '/world-generator',
+                'World Generator',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,addressbar=no,menubar=no,toolbar=no`
+            );
+
+            if (toolWindow_world_generator) {
+                // Listen for the ready message from the child window
+                window.addEventListener('message', function readyHandler(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        if (message.type === 'world-generator-ready') {
+                            // Remove the listener since we only need it once
+                            window.removeEventListener('message', readyHandler);
+                            
+                            // Now send the data
+                            toolWindow_world_generator.postMessage(JSON.stringify({
+                                type: "world-generator",
+                                data: {
+                                    world_id: "1"
+                                }
+                            }), "*");
+                        }
+                    } catch (error) {
+                        console.error('Error handling message:', error);
+                    }
+                });
+
+                toolWindow_world_generator.focus();
+            }
+            break;
+        case "plot-generator":
+        case "prophecy-creator":
+        case "region-generator":
+        case "culture-tools":
+        case "rumor-builder":
+        case "timeline-and-history":
+        case "language-tools":
+        case "astronomical-tools":
+        case "log-taker":
+        case "quest-tracker":
+        case "campaign-manager":
+        case "character-creator":
+        case "class-creator":
+        case "monster-creator":
+        case "item-creator":
+        case "spell-creator":
+        case "map-creator":
+        case "image-creator":
+            console.log(`Tool ${tool} not implemented yet`);
+            break;
+    }
+
+    console.log("Opening tool: ", tool);
+}
