@@ -1,5 +1,17 @@
 /* Tool Box Item */
 
+/* This is where the variables for colors are defined */
+
+:root {
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #2a2a2a;
+    --color-bg-tertiary: #3a3a3a;
+    --color-text-primary: #fff;
+    --color-text-secondary: #aaa;
+    --color-text-tertiary: #888;
+    --color-text-quaternary: #666;
+}
+
 .form-card {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 1rem;
@@ -25,8 +37,106 @@
     padding: 0.5rem;
     margin-top: 0.5rem;
     cursor: pointer;
+    color: #aaa;
 }
 
 .generator-button:hover {
     background: rgba(255, 255, 255, 0.1);
+    color: #fff;
 }
+
+.description-textarea {
+    width: 85%;
+    max-width: 85%;
+    height: 100px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+select {
+    width: 85%;
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+select option {
+    color: black !important;
+    background: rgba(100, 100, 100, 0.15) !important;
+}
+
+select option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.world-description-generator {
+    position: relative;
+    top: -10px;
+}
+
+.world-generator-button {
+    width: 100%;
+    position: relative;
+    left: -10px;
+    margin-bottom: 10px;
+    padding: 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #aaa;
+}
+
+.autocomplete-container {
+    position: relative;
+    width: 100%;
+}
+
+input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 87%;
+}
+
+.suggestion-item {
+    display: block;
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    width: auto;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+}
+
+.location-list {
+    margin-top: 10px;
+}
+
+.location-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+

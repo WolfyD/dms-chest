@@ -3,16 +3,19 @@
     import '$lib/styles/tool-grid.css';
     import '$lib/styles/components.css';
     import '$lib/styles/tool-box-item.css';
-    import { generateWorldName } from '$lib/utils/tracery';
+    import { generateWorldName, getWorldDescription } from '$lib/utils/tracery';
+    import { makeSlightlyDifferent } from '$lib/utils/compromise';
+    import { randomizeValues, getRandomPlane, getRandomSpecies } from '$lib/utils/world';
 
     let world_id = '';
+    let tool_description = '';
 
     window.addEventListener('message', (event) => {
         const message = JSON.parse(event.data);
         if (message.type === 'world-generator') {
             // Handle the data
             world_id = message.data.world_id;
-            alert(world_id);
+            tool_description = message.data.description;
         }
     });
 
@@ -32,7 +35,7 @@
     let majorNations: string[] = [];
     let notableLandmarks: string[] = [];
     let history = '';
-    let planarStructure = 'Material Plane';
+    let planarStructure = getRandomPlane();
     let calendarInfo = '';
     let establishedMaterial = '';
 
@@ -111,8 +114,6 @@
                 mapLocation: locationMapLocation
             };
 
-            //await invoke('create_world', { worldData });
-            // Reset form
             resetForm();
         } catch (error) {
             console.error('Failed to create world:', error);
@@ -154,7 +155,20 @@
 
 <div class="form-card world-generator">
     <h2>World Generator</h2>
-    <p>Create a new world with detailed settings and characteristics.</p>
+    {#if tool_description}
+        <p>{tool_description}</p>
+    {:else}
+        <p>Create a new world with detailed settings and characteristics.</p>
+    {/if}
+
+    <button class="generator-button world-generator-button" type="button" on:click={async () => { 
+        [genre, tone, techLevel, magicLevel] = randomizeValues(); 
+        worldName = generateWorldName([genre, tone, techLevel, magicLevel]).name; 
+        getWorldDescription([genre, tone, techLevel, magicLevel, worldName]).then(desc => description = desc); 
+        planarStructure = getRandomPlane();
+        [dominantSpecies, otherSpecies] = await getRandomSpecies().then(object => [object.dominantSpecies, object.otherSpecies]);
+        // TODO: more to come
+    }}>Generate New World</button>
 
     <form on:submit|preventDefault={handleSubmit} class="world-form">
         <div class="form-section">
@@ -165,9 +179,9 @@
             </div>
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" bind:value={description} rows="4"></textarea>
+                <textarea class="description-textarea" id="description" bind:value={description} rows="4"></textarea><button class="generator-button world-description-generator" type="button" on:click={() => { if(!worldName){ worldName = generateWorldName([genre, tone, techLevel, magicLevel]).name } {getWorldDescription([genre, tone, techLevel, magicLevel, worldName]).then(desc => description = desc)} }}>Generate</button>
             </div>
-        </div>         
+        </div>
 
         <div class="form-section">
             <h3>World Settings</h3>
@@ -203,6 +217,8 @@
                     {/each}
                 </select>
             </div>
+
+            <button class="generator-button" type="button" on:click={() => { [genre, tone, techLevel, magicLevel] = randomizeValues() }}>Randomize</button>
         </div>
 
         <div class="form-section">

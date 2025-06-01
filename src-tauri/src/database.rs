@@ -1,4 +1,4 @@
-use rusqlite::{Connection, Result as SqliteResult, params};
+use rusqlite::{Connection, Result as SqliteResult, params, Row};
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use tauri::State;
@@ -132,56 +132,39 @@ pub fn get_database_state() -> DatabaseState {
 }
 
 #[tauri::command]
-pub async fn create_world(state: State<'_, DatabaseState>, world_data: serde_json::Value) -> Result<(), String> {
-    let mut conn = state.0.lock()
+pub async fn query_database(state: State<'_, DatabaseState>, query: String, params: Vec<String>) -> Result<Vec<serde_json::Value>, String> {
+    let conn = state.0.lock()
         .map_err(|_| DatabaseError::LockError("Failed to acquire database lock".to_string()))
         .map_err(|e| e.to_string())?;
 
-    let tx = conn.transaction()
+    let mut stmt = conn.prepare(&query)
         .map_err(|e| e.to_string())?;
-
-    // Insert into worlds table
-    let world_id = tx.execute(
-        "INSERT INTO worlds (name, description, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-        params![
-            world_data["name"].as_str().unwrap_or(""),
-            world_data["description"].as_str().unwrap_or("")
-        ],
-    )
+    
+    let column_count = stmt.column_count();
+    let column_names: Vec<String> = (0..column_count)
+        .map(|i| stmt.column_name(i).unwrap_or("").to_string())
+        .collect();
+    
+    let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
+        let mut map = serde_json::Map::new();
+        for (i, name) in column_names.iter().enumerate() {
+            let value = match row.get::<_, i64>(i) {
+                Ok(v) => serde_json::Value::Number(serde_json::Number::from(v)),
+                Err(_) => match row.get::<_, f64>(i) {
+                    Ok(v) => serde_json::Value::Number(serde_json::Number::from_f64(v).unwrap_or(serde_json::Number::from(0))),
+                    Err(_) => match row.get::<_, String>(i) {
+                        Ok(v) => serde_json::Value::String(v),
+                        Err(_) => serde_json::Value::Null
+                    }
+                }
+            };
+            map.insert(name.clone(), value);
+        }
+        Ok(serde_json::Value::Object(map))
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
     .map_err(|e| e.to_string())?;
 
-    // Insert into world_details table
-    tx.execute(
-        "INSERT INTO world_details (
-            world_id, genre, tone, tech_level, magic_level,
-            dominant_species, other_species, religions, pantheon,
-            continents, major_nations, notable_landmarks,
-            history, planar_structure, calendar_info, established_material,
-            created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-        params![
-            world_id,
-            world_data["genre"].as_str().unwrap_or("Fantasy"),
-            world_data["tone"].as_str().unwrap_or("Mixed"),
-            world_data["techLevel"].as_str().unwrap_or("Medieval"),
-            world_data["magicLevel"].as_str().unwrap_or("Low"),
-            world_data["dominantSpecies"].as_str().unwrap_or("[]"),
-            world_data["otherSpecies"].as_str().unwrap_or("[]"),
-            world_data["religions"].as_str().unwrap_or("[]"),
-            world_data["pantheon"].as_str().unwrap_or("[]"),
-            world_data["continents"].as_str().unwrap_or("[]"),
-            world_data["majorNations"].as_str().unwrap_or("[]"),
-            world_data["notableLandmarks"].as_str().unwrap_or("[]"),
-            world_data["history"].as_str().unwrap_or(""),
-            world_data["planarStructure"].as_str().unwrap_or("Material Plane"),
-            world_data["calendarInfo"].as_str().unwrap_or(""),
-            world_data["establishedMaterial"].as_str().unwrap_or("")
-        ],
-    )
-    .map_err(|e| e.to_string())?;
-
-    tx.commit()
-        .map_err(|e| e.to_string())?;
-
-    Ok(())
+    Ok(rows)
 } 

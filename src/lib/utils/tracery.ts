@@ -1,5 +1,8 @@
 import tracery from 'tracery-grammar'; 
-import { stringsToSettings, getWorldNameParts, toneSnippets, genreSnippets, techTemplates, magicTemplates } from './world';
+import { stringsToSettings, getWorldNameParts, toneSnippets, genreSnippets, techTemplates, magicTemplates, type WorldSettings } from './world';
+import { readWordNetJson } from './paths';
+import fs from 'fs';
+import path from 'path';
 
 type Genre =
   | 'Fantasy' | 'Sci-Fi' | 'Post-Apocalyptic' | 'Modern'
@@ -62,7 +65,7 @@ function getTraceryGrammar(tone: Tone, genre: Genre, name: string): tracery.Gram
   const toneData = toneSnippets[tone] ?? toneSnippets.Other;
   const genreData = genreSnippets[genre] ?? genreSnippets.Other;
 
-  return tracery.createGrammar({
+  const grammar = tracery.createGrammar({
     origin: [
       'The world of #worldName# is a #toneAdj# #genre# setting with #genreDetail#. #toneDetail#',
       '#worldName# is known for its #toneAdj# nature and #genreDetail#. #toneDetail#',
@@ -81,20 +84,35 @@ function getTraceryGrammar(tone: Tone, genre: Genre, name: string): tracery.Gram
     genreDetail: genreData,
     toneDetail: toneData.toneEffect.map(effect => `It is a place where ${effect}.`)
   });
+
+  return grammar;
 }
 
-async function getSynonyms(word: string): Promise<string[]> {
-  return new Promise(resolve => {
-    wordnet.lookup(word, results => {
-      const synonyms = new Set<string>();
-      results.forEach(r => r.synonyms.forEach(s => synonyms.add(s)));
-      resolve([...synonyms]);
-    });
-  });
+async function getWordNetJson(): Promise<any> {
+  const wordNetJson = await readWordNetJson();
+  return wordNetJson;
+}
+
+export async function getSynonyms(word: string): Promise<string[]> {
+  const wordNetJson = await getWordNetJson();
+  const wordnetData: WordNetEntry[] = JSON.parse(
+    fs.readFileSync(path.join(__dirname, 'data', 'wordnet.json'), 'utf-8')
+  );
+  const entry = wordnetData.find(entry => entry.word.toLowerCase() === word.toLowerCase());
+  return entry ? entry.synonyms : [];
+}
+
+export async function getWorldDescription(strings: string[]): Promise<string> {
+  const world = stringsToSettings(strings);
+  let description = await generateWorldDescription(world).then((description) => { return description; });
+
+  console.log("--DESCRIPTION--", description);
+
+  return description;
 }
 
 export async function generateWorldDescription(world: WorldSettings): Promise<string> {
-  const grammar = getTraceryGrammar(world.tone, world.genre);
+  const grammar = getTraceryGrammar(world.tone, world.genre, world.name);
   grammar.addModifiers(tracery.baseEngModifiers);
   grammar.pushRules('name', [world.name]);
 
@@ -106,4 +124,9 @@ export async function generateWorldDescription(world: WorldSettings): Promise<st
   const magic = magicOptions[Math.floor(Math.random() * magicOptions.length)];
 
   return `${intro}\nTechnology level: ${tech}\nMagic: ${magic}`;
+}
+
+interface WordNetEntry {
+  word: string;
+  synonyms: string[];
 }

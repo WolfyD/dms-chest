@@ -7,17 +7,31 @@
   import Header from '$lib/components/layout/Header.svelte';
   import { initHeightAdjustment } from '$lib/utils/ui';
   import { initializeDatabase, closeDatabase } from '$lib/database/init';
+  import { invoke } from '@tauri-apps/api/core';
 
   let cleanup: (() => void) | undefined;
 
   onMount(() => {
-    // Initialize database
-    initializeDatabase().catch(error => {
-      console.error('Failed to initialize database:', error);
-    });
+    const init = async () => {
+      try {
+        // Initialize database
+        await initializeDatabase().catch(error => {
+          console.error('Failed to initialize database:', error);
+        });
 
-    // Initialize height adjustment
-    cleanup = initHeightAdjustment();
+        // Extract executables
+        await invoke('extract_executables').catch(error => {
+          console.error('Failed to extract executables:', error);
+        });
+
+        // Initialize height adjustment
+        cleanup = initHeightAdjustment();
+      } catch (error) {
+        console.error('Failed to initialize:', error);
+      }
+    };
+
+    init();
 
     // Return cleanup function
     return () => {

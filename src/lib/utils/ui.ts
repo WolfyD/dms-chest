@@ -1,3 +1,5 @@
+import { goto } from '$app/navigation';
+import { toolData } from '$lib/stores/toolData';
 // This file will contain all the UI utilities for the app
 
 // This function checks which page is loaded and adds the class "selected" to the correct tab
@@ -65,46 +67,14 @@ export function initHeightAdjustment(): () => void {
  * Opens a tool
  * @param tool - The tool to open
  */
-export function openTool(tool: string) {
+export function openTool(tool: string, tool_description: string, id: string) {
+    toolData.set({
+        id: id,
+        description: tool_description
+    });
+
     switch (tool) {
-        case "world-generator":
-            // Create a new window
-            const width = 1000;
-            const height = 800;
-            const left = (window.screen.width - width) / 2;
-            const top = (window.screen.height - height) / 2;
-
-            const toolWindow_world_generator = window.open(
-                '/world-generator',
-                'World Generator',
-                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,addressbar=no,menubar=no,toolbar=no`
-            );
-
-            if (toolWindow_world_generator) {
-                // Listen for the ready message from the child window
-                window.addEventListener('message', function readyHandler(event) {
-                    try {
-                        const message = JSON.parse(event.data);
-                        if (message.type === 'world-generator-ready') {
-                            // Remove the listener since we only need it once
-                            window.removeEventListener('message', readyHandler);
-                            
-                            // Now send the data
-                            toolWindow_world_generator.postMessage(JSON.stringify({
-                                type: "world-generator",
-                                data: {
-                                    world_id: "1"
-                                }
-                            }), "*");
-                        }
-                    } catch (error) {
-                        console.error('Error handling message:', error);
-                    }
-                });
-
-                toolWindow_world_generator.focus();
-            }
-            break;
+        case "world-generator": goto('/world-generator'); break;
         case "plot-generator":
         case "prophecy-creator":
         case "region-generator":

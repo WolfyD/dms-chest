@@ -37,7 +37,9 @@ pub fn get_migration() -> Migration {
                 deleted_at TIMESTAMP,
 
                 FOREIGN KEY (campaign_id) REFERENCES campaigns(id),
-                FOREIGN KEY (world_id) REFERENCES worlds(id)
+                FOREIGN KEY (world_id) REFERENCES worlds(id),
+                FOREIGN KEY (calendar_id) REFERENCES calendars(id),
+                FOREIGN KEY (house_rules_id) REFERENCES house_rules(id)
             );
 
             CREATE TABLE IF NOT EXISTS campaign_arcs (
@@ -256,6 +258,61 @@ pub fn get_migration() -> Migration {
                 FOREIGN KEY (map_id) REFERENCES maps(id),
                 FOREIGN KEY (image_id) REFERENCES images(id)
             );
+
+            CREATE TABLE IF NOT EXISTS calendars (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                deleted_at TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS calendar_details (
+                id INTEGER PRIMARY KEY,
+                calendar_id INTEGER NOT NULL,
+
+                days_in_year INTEGER NOT NULL,
+                months_in_year INTEGER NOT NULL,
+                days_in_week INTEGER NOT NULL,
+                weeks_in_month INTEGER NOT NULL,
+                months TEXT NOT NULL DEFAULT '[]',
+                days_of_week TEXT NOT NULL DEFAULT '[]',
+                hours_in_day INTEGER NOT NULL,
+                minutes_in_hour INTEGER NOT NULL,
+                seconds_in_minute INTEGER NOT NULL,
+                pre_epoch_prefix TEXT NOT NULL DEFAULT '',
+                post_epoch_prefix TEXT NOT NULL DEFAULT '',
+                epoch_term TEXT NOT NULL DEFAULT '',
+                important_holidays TEXT NOT NULL DEFAULT '[]',
+                notable_events TEXT NOT NULL DEFAULT '[]',
+                major_astronomical_events TEXT NOT NULL DEFAULT '[]',
+                major_astrological_events TEXT NOT NULL DEFAULT '[]',
+                major_historical_events TEXT NOT NULL DEFAULT '[]',
+                moon_phases TEXT NOT NULL DEFAULT '[]',
+                moon_phases_in_month INTEGER NOT NULL,
+                moon_phase_at_0 INTEGER NOT NULL,
+
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                deleted_at TIMESTAMP,
+
+                FOREIGN KEY (calendar_id) REFERENCES calendars(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS house_rules (
+                id INTEGER PRIMARY KEY,
+                campaign_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                rules TEXT DEFAULT '[]',
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                deleted_at TIMESTAMP,
+
+                FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
+            );
+
             
         ".to_string(),
         down_sql: "
