@@ -8,6 +8,7 @@
     import { makeSlightlyDifferent } from '$lib/utils/compromise';
     import { randomizeValues, getRandomPlane, getRandomSpecies, getLocationParents, getLocations, createAutocomplete } from '$lib/utils/world';
     import { onMount } from 'svelte';
+    import AutocompleteInput from '$lib/components/AutocompleteInput.svelte';
     
 
 
@@ -101,6 +102,14 @@
         showSuggestions = state.showSuggestions;
         selectedIndex = state.selectedIndex;
         console.log("location_id", location_id);
+        if(location_id != 0) {
+            getLocationList(location_id);
+        }
+    }
+
+    async function handleLocationSelect(item: { id: number | string, label: string, data: any }) {
+        locationName = item.label;
+        location_id = Number(item.id);
         if(location_id != 0) {
             getLocationList(location_id);
         }
@@ -353,34 +362,13 @@
         <div class="form-section">
             <h3>Physical world</h3>
             <div class="form-group">
-                <div class="autocomplete-container">
-                    <input 
-                        type="text" 
-                        autocomplete="off"
-                        id="locationName" 
-                        bind:value={locationName}
-                        on:input={handleInput}
-                        on:keydown={handleKeydown}
-                        placeholder="Enter location name..." 
-                    />
-                    {#if showSuggestions && suggestions.length > 0}
-                        <ul class="suggestions-list">
-                            {#each suggestions as suggestion, i}
-                                <li>
-                                    <menuitem
-                                        class="suggestion-item"
-                                        class:selected={i === selectedIndex}
-                                        on:click={() => selectSuggestion({ name: suggestion.name, id: suggestion.id })}
-                                        on:mouseover={() => selectedIndex = i}
-                                        on:focus={() => selectedIndex = i}
-                                    >
-                                        {suggestion.name}
-                                    </menuitem>
-                                </li>
-                            {/each}
-                        </ul>
-                    {/if}
-                </div>
+                <label for="locationName">Location Name</label>
+                <AutocompleteInput
+                    searchFn={getLocations}
+                    bind:value={locationName}
+                    placeholder="Enter location name..."
+                    onSelect={handleLocationSelect}
+                />
 
                 {#if locationList.length > 0}
                     <div class="form-group location-list">

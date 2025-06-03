@@ -5,38 +5,39 @@
     import '$lib/styles/tool-grid.css';
     import '$lib/styles/components.css';
     import '$lib/styles/tool-box-item.css';
-    import { getLocationParents, getLocations, createAutocomplete } from '$lib/utils/region';
-    
+    import { getLocationParents, getLocationChildren, getLocations } from '$lib/utils/region';
+    import AutocompleteInput from '$lib/components/AutocompleteInput.svelte';
+
     let suggestions: { name: string, id: number }[] = [];
     let topLevelRegionName = '';
+    let topLevelRegionId = 0;
+    let locationList: { name: string, id: number, type: string }[] = [];
     function handleSubmit() {
         console.log('submit');
     }
 
-    async function handleRegionNameInputWithDebounceAndAutocomplete(event: Event) {
-        const input = event.target as HTMLInputElement;
-        topLevelRegionName = input.value;
-        const debouncedSearch = debounce(getLocations, 300);
-        const suggestions = await debouncedSearch(topLevelRegionName);
-        console.log(suggestions);
+    function handleRegionNameSelect(item: { id: number | string, label: string, data: any }) {
+        topLevelRegionName = item.label;
+        topLevelRegionId = Number(item.id);
+
+        if(topLevelRegionId != 0) {
+            let locationParents = getLocationList(topLevelRegionId);      
+            let locationChildren = getLocationList(topLevelRegionId, true);
+            console.log("locationParents", locationParents);
+            console.log("locationChildren", locationChildren);
+        }
     }
 
-    function debounce(func: Function, wait: number) {
-        let timeout: NodeJS.Timeout;
-        return function executedFunction(...args: any[]) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    async function getLocationList(id: number, children: boolean = false) : Promise<{ name: string, id: number, type: string }[]> {
+        const locations = await (children ? getLocationChildren : getLocationParents)(id);
+        console.log("locations", locations);
+        if(locations.length > 0) {
+            return locations;
+        }
+        return [];
     }
 
-    function handleSuggestionClick(suggestion: { name: string, id: number }) {
-        topLevelRegionName = suggestion.name;
-        suggestions = [];
-    }
+    
 
 </script>
 
@@ -51,16 +52,12 @@
             <h3>Top Level Region</h3>
             <div class="form-group">
                 <label for="regionName">Region Name</label>
-                <input type="text" bind:value={topLevelRegionName} on:input={handleRegionNameInputWithDebounceAndAutocomplete} id="regionName" required />
-                <div class="autocomplete-container">
-                    <div class="suggestions-list">
-                        {#each suggestions as suggestion}
-                            <menuitem class="suggestion-item" on:click={() => handleSuggestionClick(suggestion)}>
-                                {suggestion.name}
-                            </menuitem>
-                        {/each}
-                    </div>
-                </div>
+                <AutocompleteInput
+                    searchFn={getLocations}
+                    bind:value={topLevelRegionName}
+                    placeholder="Enter location name..."
+                    onSelect={handleRegionNameSelect}
+                />
             </div>
             <div class="form-group">
                 <label for="description">Description</label>

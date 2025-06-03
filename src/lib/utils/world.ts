@@ -571,7 +571,14 @@ export async function getLocationParents(id: number): Promise<{ name: string, id
 					FROM locations l
 					JOIN location_chain lc ON l.id = lc.parent_id
 				)
-				SELECT name, id, type FROM location_chain order by id asc;`,
+				SELECT 
+					name, 
+					id, 
+					(SELECT name FROM area_types WHERE id = area_type_id) as type
+				FROM 
+					location_chain 
+				ORDER BY 
+					id ASC;`,
 			params: [id.toString()]
 		});
 
