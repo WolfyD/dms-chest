@@ -183,7 +183,7 @@ pub fn get_migration() -> Migration {
                 CREATE INDEX IF NOT EXISTS idx_locations_has_parent ON locations(has_parent);
                 CREATE INDEX IF NOT EXISTS idx_locations_has_children ON locations(has_children);
                 CREATE INDEX IF NOT EXISTS idx_locations_name ON locations(name);
-                CREATE INDEX IF NOT EXISTS idx_locations_type ON locations(type);
+                CREATE INDEX IF NOT EXISTS idx_locations_area_type_id ON locations(area_type_id);
 
             -- location_details:
                 CREATE INDEX IF NOT EXISTS idx_location_details_map_id ON location_details(map_id);

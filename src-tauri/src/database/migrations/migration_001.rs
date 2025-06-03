@@ -181,18 +181,17 @@ pub fn get_migration() -> Migration {
                 other_species TEXT DEFAULT '[]',
                 religions TEXT DEFAULT '[]',
                 pantheon TEXT DEFAULT '[]',
-                continents TEXT DEFAULT '[]',
-                major_nations TEXT DEFAULT '[]',
                 notable_landmarks TEXT DEFAULT '[]',
                 history TEXT DEFAULT '',
                 planar_structure TEXT DEFAULT 'Material Plane',
-                calendar_info TEXT DEFAULT '',
+                calendar_id INTEGER DEFAULT NULL,
                 established_material TEXT DEFAULT '',
                 created_at TIMESTAMP NOT NULL,
                 updated_at TIMESTAMP NOT NULL,
                 deleted_at TIMESTAMP,
 
-                FOREIGN KEY (world_id) REFERENCES worlds(id)
+                FOREIGN KEY (world_id) REFERENCES worlds(id),
+                FOREIGN KEY (calendar_id) REFERENCES calendars(id)
             );
 
             CREATE TABLE IF NOT EXISTS locations (
@@ -203,15 +202,13 @@ pub fn get_migration() -> Migration {
                 has_children BOOLEAN DEFAULT true,
                 name TEXT NOT NULL,
                 description TEXT DEFAULT '',
-                type TEXT NOT NULL CHECK(type IN (
-                    'Planet', 'Moon', 'Continent', 'Landmass', 'Isle', 'Island', 'Region', 'Union', 
-                    'Agglomeration', 'Country', 'Province', 'County', 'City', 'Town', 'Village', 
-                    'Hamlet', 'District', 'Street', 'Road', 'Building', 'Room', 'Other')),
+                area_type_id INTEGER NOT NULL,
                 created_at TIMESTAMP NOT NULL,
                 updated_at TIMESTAMP NOT NULL,
                 deleted_at TIMESTAMP,
                 
-                FOREIGN KEY (world_id) REFERENCES worlds(id)
+                FOREIGN KEY (world_id) REFERENCES worlds(id),
+                FOREIGN KEY (area_type_id) REFERENCES area_types(id)
             );
 
             CREATE TABLE IF NOT EXISTS location_details (
@@ -312,6 +309,16 @@ pub fn get_migration() -> Migration {
 
                 FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
             );
+
+            CREATE TABLE area_types (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                level INTEGER NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                deleted_at DATETIME
+            );
+            
 
             
         ".to_string(),

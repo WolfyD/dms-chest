@@ -26,7 +26,9 @@ export const categories = {
             ["Language tools", "Because common gets boring.",
              "Build your own languages or naming schemes, generate simple ciphers, and structure linguistic rules for realism or fun."],
             ["Astronomical tools", "Worlds beyond your world.",
-             "Manage multiple moons, stars, and constellations. Create celestial events like eclipses or comets with mechanical or narrative consequences."]
+             "Manage multiple moons, stars, and constellations. Create celestial events like eclipses or comets with mechanical or narrative consequences."],
+             ["Economy", "From copper commons to platinum politics — master your world's wealth.",
+             "Manage your world's economic system, create price tables, simulate scarcity and trade, and dynamically generate item values based on regional or magical influences."]
           ]
     },
     campaign: {

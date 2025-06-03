@@ -75,9 +75,10 @@ export function openTool(tool: string, tool_description: string, id: string) {
 
     switch (tool) {
         case "world-generator": goto('/world-generator'); break;
+        case "economy": goto('/economy'); break;
+        case "region-generator": goto('/region-generator'); break;
         case "plot-generator":
         case "prophecy-creator":
-        case "region-generator":
         case "culture-tools":
         case "rumor-builder":
         case "timeline-and-history":

@@ -3,7 +3,7 @@ use super::super::Migration;
 pub fn get_migration() -> Migration {
     Migration {
         version: 999,
-        description: "Insert example data and create indexes".to_string(),
+        description: "Insert example data, create indexes, and triggers".to_string(),
         up_sql: "
             -- Data --
             -- Campaign data --
@@ -13,33 +13,6 @@ pub fn get_migration() -> Migration {
             -- World data --
             INSERT INTO worlds (name, description, created_at, updated_at) VALUES 
             ('Example World', 'Example world for experimenting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO world_details (world_id, genre, tone, tech_level, magic_level, dominant_species, other_species, religions, pantheon, continents, major_nations, notable_landmarks, history, planar_structure, calendar_info, established_material, created_at, updated_at) VALUES 
-            (1, 'Fantasy', 'Heroic', 'Medieval', 'High', '[]', '[]', '[]', '[]', '[]', '[]', '[]', '', 'Material Plane', '', 'D&D 5e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES 
-            (1, null, false, true, 'Earth', 'The planet we live on', 'Planet', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 1, true, true, 'Europe', 'The continent of Europe', 'Continent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 2, true, true, 'United Kingdom', 'The United Kingdom', 'Country', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 3, true, true, 'Wales', 'The country of Wales', 'Country', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-            
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 3, true, true, 'Scotland', 'The country of Scotland', 'Country', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-            
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 3, true, true, 'England', 'The country of England', 'Country', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-            
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 6, true, true, 'London', 'The capital of the United Kingdom', 'City', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, type, created_at, updated_at) VALUES
-            (1, 7, true, true, 'Palace of Westminster', 'London SW1A 0AA, United Kingdom', 'Building', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
             -- Calendar data --
             INSERT INTO calendars (name, description, created_at, updated_at) VALUES 
@@ -61,6 +34,107 @@ pub fn get_migration() -> Migration {
             '[{ \"name\": \"First man on the moon\", \"year\": 1969, \"month\": 7, \"day\": 20, \"description\": \"Neil Armstrong and Buzz Aldrin became the first humans to land on the Moon\"}, {\"name\": \"Sliced bread invented\", \"year\": 1928, \"month\": 1, \"day\": 1, \"description\": \"The first sliced bread was invented by Otto Frederick Rohwedder\"}]', 
             '[\"Full moon\", \"New moon\", \"First quarter\", \"Last quarter\", \"Waxing gibbous\", \"Waning gibbous\", \"Waxing crescent\", \"Waning crescent\"]', 
             8, 'Waxing crescent', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            
+
+            -- Terrestrial and Astronomical Areas --
+            INSERT INTO area_types (name, level) VALUES
+            -- Level 1: Internal Structures
+            ('Room', 1),
+            ('Apartment', 2),
+            ('Floor', 2),
+            -- Level 3: Building Components / Specific Locations
+            ('Building', 3),
+            -- Level 4: Immediate Surroundings / Infrastructure
+            ('Street', 4),
+            ('Road', 4),
+            ('Avenue', 4),
+            ('Boulevard', 4),
+            ('Lane', 4),
+            ('Alley', 4),
+            ('Block', 4), -- An urban block of buildings
+            -- Level 5: Settlements / Small Landmasses (can often be settlements)
+            ('Neighborhood', 5),
+            ('Borough', 5),
+            ('Ward', 5),
+            ('Hamlet', 5),
+            ('Village', 5),
+            ('Town', 5),
+            ('City', 5),
+            ('Isle', 5), -- A small island, often a settlement itself
+            ('Island', 5), -- A larger island, can contain multiple settlements
+            -- Level 6: Urban Agglomerations
+            ('Agglomeration', 6), -- Metropolitan area, collection of cities/towns
+            ('Metropolitan Area', 6),
+            -- Level 7: Local Administrative Divisions
+            ('District', 7),
+            ('County', 7),
+            ('Prefecture', 7),
+            ('Department', 7),
+            ('Shire', 7),
+            -- Level 8: Major Sub-National Divisions
+            ('Region', 8), -- As an administrative division (e.g., within a country)
+            ('Province', 8),
+            ('State', 8),
+            ('Territory', 8),
+            -- Level 9: Countries
+            ('Country', 9),
+            -- Level 10: Supranational Unions
+            ('Union', 10), -- E.g., European Union
+            -- Level 11: Major Terrestrial Features
+            ('Continent', 11),
+            ('Ocean', 11),
+            ('Subcontinent', 11),
+            ('Landmass', 11),
+            -- Level 12: Planetary Bodies
+            ('Planet', 12),
+            ('Moon', 12), -- Same level as Planet, as it's a primary celestial body
+            -- Level 13: Stellar Systems
+            ('Stellar System', 13),
+            ('Planetary System', 13),
+            -- Level 14: Star Clusters
+            ('Star Cluster', 14),
+            ('Open Cluster', 14),
+            ('Globular Cluster', 14),
+            -- Level 15: Galaxies
+            ('Galaxy', 15),
+            -- Level 16: Galaxy Groups
+            ('Galaxy Group', 16),
+            -- Level 17: Galaxy Clusters
+            ('Galaxy Cluster', 17),
+            -- Level 18: Superclusters
+            ('Supercluster', 18),
+            -- Level 19: Universe
+            ('Universe', 19);
+
+            -- World details data --
+            INSERT INTO world_details (world_id, genre, tone, tech_level, magic_level, dominant_species, other_species, religions, pantheon, notable_landmarks, history, planar_structure, calendar_id, established_material, created_at, updated_at) VALUES 
+            (1, 'Fantasy', 'Heroic', 'Medieval', 'High', '[]', '[]', '[]', '[]', '[]', '', 'Material Plane', 1, 'D&D 5e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            -- Locations data --
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES 
+            (1, null, false, true, 'Earth', 'The planet we live on', 38, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 1, true, true, 'Europe', 'The continent of Europe', 34, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 2, true, true, 'United Kingdom', 'The United Kingdom', 33, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 3, true, true, 'Wales', 'The country of Wales', 32, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+            
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 3, true, true, 'Scotland', 'The country of Scotland', 32, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+            
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 3, true, true, 'England', 'The country of England', 32, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+            
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 6, true, true, 'London', 'The capital of the United Kingdom', 18, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+            INSERT INTO locations (world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
+            (1, 7, true, true, 'Palace of Westminster', 'London SW1A 0AA, United Kingdom', 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
             -- House rules data --
             INSERT INTO house_rules (campaign_id, name, description, rules, created_at, updated_at) VALUES 
@@ -381,7 +455,7 @@ pub fn get_migration() -> Migration {
                 CREATE INDEX IF NOT EXISTS idx_locations_has_parent ON locations(has_parent);
                 CREATE INDEX IF NOT EXISTS idx_locations_has_children ON locations(has_children);
                 CREATE INDEX IF NOT EXISTS idx_locations_name ON locations(name);
-                CREATE INDEX IF NOT EXISTS idx_locations_type ON locations(type);
+                CREATE INDEX IF NOT EXISTS idx_locations_area_type_id ON locations(area_type_id);
 
             -- location_details:
                 CREATE INDEX IF NOT EXISTS idx_location_details_map_id ON location_details(map_id);
@@ -495,6 +569,22 @@ pub fn get_migration() -> Migration {
             -- spell_details:
                 CREATE INDEX IF NOT EXISTS idx_spell_details_spell_id ON spell_details(spell_id);
                 CREATE INDEX IF NOT EXISTS idx_spell_details_spell_id ON spell_details(spell_id);
+
+            -- terrestrial_and_astronomical_areas:
+                CREATE INDEX IF NOT EXISTS idx_area_types_level ON area_types (level);
+
+
+
+            -- Triggers --
+            
+            -- Trigger to update 'updated_at' on every change for area_types
+            CREATE TRIGGER update_area_types_updated_at
+            AFTER UPDATE ON area_types
+            FOR EACH ROW
+            BEGIN
+                UPDATE area_types SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+            END;
+
 
 
         ".to_string(),

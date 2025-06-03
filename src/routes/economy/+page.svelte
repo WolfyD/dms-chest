@@ -213,7 +213,7 @@
     }
 </script>
 
-<div class="form-card tool-form world-generator">
+<div class="form-card tool-form economy-generator">
     <h2>World Generator</h2>
     <p>Generate a complete world with continents, biomes, major civilizations, and interwoven history. Randomized or controlled by parameters you set.</p>
 

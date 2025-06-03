@@ -153,7 +153,7 @@
     }
 </script>
 
-<div class="form-card world-generator">
+<div class="form-card tool-form world-generator">
     <h2>World Generator</h2>
     {#if tool_description}
         <p>{tool_description}</p>
