@@ -168,3 +168,41 @@ pub async fn query_database(state: State<'_, DatabaseState>, query: String, para
 
     Ok(rows)
 } 
+
+#[tauri::command]
+pub async fn query_database_no_params(state: State<'_, DatabaseState>, query: String) -> Result<Vec<serde_json::Value>, String> {
+    let conn = state.0.lock()
+        .map_err(|_| DatabaseError::LockError("Failed to acquire database lock".to_string()))
+        .map_err(|e| e.to_string())?;
+
+    let mut stmt = conn.prepare(&query)
+        .map_err(|e| e.to_string())?;
+    
+    let column_count = stmt.column_count();
+    let column_names: Vec<String> = (0..column_count)
+        .map(|i| stmt.column_name(i).unwrap_or("").to_string())
+        .collect();
+    
+    let rows = stmt.query_map([], |row| {
+        let mut map = serde_json::Map::new();
+        for (i, name) in column_names.iter().enumerate() {
+            let value = match row.get::<_, i64>(i) {
+                Ok(v) => serde_json::Value::Number(serde_json::Number::from(v)),
+                Err(_) => match row.get::<_, f64>(i) {
+                    Ok(v) => serde_json::Value::Number(serde_json::Number::from_f64(v).unwrap_or(serde_json::Number::from(0))),
+                    Err(_) => match row.get::<_, String>(i) {
+                        Ok(v) => serde_json::Value::String(v),
+                        Err(_) => serde_json::Value::Null
+                    }
+                }
+            };
+            map.insert(name.clone(), value);
+        }
+        Ok(serde_json::Value::Object(map))
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<_>, _>>()
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows)
+} 

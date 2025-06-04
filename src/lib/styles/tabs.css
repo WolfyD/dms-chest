@@ -13,7 +13,7 @@
     border-radius: var(--radius-md);
     transition: var(--transition-default);
     cursor: pointer;
-    width: 80%;
+    width: 85%;
 }
 
 .tab .category-name {
@@ -45,6 +45,106 @@
 .tab.selected .tool-count {
     color: var(--color-bg-primary);
 }
+
+.campaign-select-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.campaign-select-container * {
+    font-size: .9em;
+}
+
+.campaign-select {
+    width: 100%; 
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    transition: var(--transition-default);
+    cursor: pointer;
+}
+
+.new-campaign-button {
+    font-size: .8em;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    transition: var(--transition-default);
+    cursor: pointer;
+}
+
+#new-campaign-dialog {
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    width: 50%;
+    height: 80%;
+    box-shadow: 2px 2px 2px 0 rgba(233, 206, 206, 0.2);
+}
+
+#new-campaign-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+#new-campaign-dialog form, 
+#new-campaign-dialog form * {
+    transition: none !important;
+}
+
+#new-campaign-dialog form h2 {
+    margin: 5px auto 20px auto;
+    color: var(--color-text-primary);
+    font-size: 1.5em;
+}
+
+#new-campaign-dialog form input, 
+#new-campaign-dialog form textarea, 
+#new-campaign-dialog form .dropdown-header,
+#new-campaign-dialog form button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    width: 80%;
+    margin: 0 auto;
+    resize: vertical;
+}
+
+#new-campaign-dialog form textarea {
+    min-height: 100px;
+    height: 150px;
+}
+
+#new-campaign-dialog form button {
+    display: block;
+    background-color: #444;
+    color: var(--color-bg-primary);
+    border: none;
+
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    transition: var(--transition-default) !important;
+}
+
+#new-campaign-dialog form button:hover {
+    background-color: var(--color-primary);
+    
+    transition: var(--transition-default) !important;
+}
+
+#new-campaign-dialog .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -4,7 +4,7 @@
 mod database;
 mod extractor;
 
-use database::{get_database_state, initialize_database, query_database};
+use database::{get_database_state, initialize_database, query_database, query_database_no_params};
 use extractor::extract_7z;
 use std::fs;
 
@@ -26,6 +26,7 @@ fn main() {
             initialize_database,
             extract_executables,
             query_database,
+            query_database_no_params,
             read_file
         ])
         .run(tauri::generate_context!())

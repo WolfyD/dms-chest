@@ -49,7 +49,9 @@ export const categories = {
             ["Session 0 and safety tools", "Establish tone before the swordplay.",
              "Store and manage player preferences, session zero notes, tone agreements, lines/veils, and other safety tools for better group cohesion."],
             ["Player feedback", "The quiet ones have opinions too.",
-             "Collect and store player feedback (anonymous or not), session reactions, and improvement suggestions. Great for long-term campaigns."]
+             "Collect and store player feedback (anonymous or not), session reactions, and improvement suggestions. Great for long-term campaigns."],
+            ["Scene store", "No more fumbling for that perfect moment.",
+             "Create, store, and quickly reference all your narrative scenes, ensuring you can pull up the right moment exactly when you need it."]
           ]          
     },
     character: {
