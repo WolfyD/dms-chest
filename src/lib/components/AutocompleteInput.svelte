@@ -7,14 +7,16 @@
     export let placeholder = 'Type to search...';
     export let minInputLength = 3;
     export let debounceTime = 300;
-    export let value = '';
+    export let value: string | number | { id: number; name: string } = '';
     export let onSelect: (item: SuggestionItem<any>) => void = () => {};
+    export let class_name: string = '';
 
     // Local state
     let suggestions: SuggestionItem<any>[] = [];
     let showSuggestions = false;
     let selectedIndex = -1;
     let inputElement: HTMLInputElement;
+    let displayValue = '';
 
     // Create autocomplete instance
     const autocomplete = createDebouncedAutocomplete(searchFn, {
@@ -22,18 +24,26 @@
         debounceTime,
         onSelect: (item) => {
             onSelect(item);
+            if (typeof item.data === 'object' && item.data !== null) {
+                value = item.data as { id: number; name: string };
+            } else {
+                // If the id is a number, keep it as a number, otherwise convert to string
+                value = typeof item.id === 'number' ? item.id : String(item.id);
+            }
+            displayValue = item.label;
         }
     });
 
     // Handle input changes
     async function handleInput(event: Event) {
         const input = event.target as HTMLInputElement;
-        value = input.value;
+        displayValue = input.value;
         // Clear selected state when user starts typing
         if (autocomplete.getState().selected) {
             autocomplete.reset();
+            value = '';
         }
-        const state = await autocomplete.handleInput(value);
+        const state = await autocomplete.handleInput(displayValue);
         suggestions = state.suggestions;
         showSuggestions = state.showSuggestions;
         selectedIndex = state.selectedIndex;
@@ -51,6 +61,12 @@
         selectedIndex = state.selectedIndex;
         if (state.selected) {
             onSelect(state.selected);
+            if (typeof state.selected.data === 'object' && state.selected.data !== null) {
+                value = state.selected.data as { id: number; name: string };
+            } else {
+                value = typeof state.selected.id === 'number' ? state.selected.id : String(state.selected.id);
+            }
+            displayValue = state.selected.label;
         }
     }
 
@@ -61,11 +77,25 @@
         showSuggestions = state.showSuggestions;
         selectedIndex = state.selectedIndex;
         onSelect(suggestion);
+        if (typeof suggestion.data === 'object' && suggestion.data !== null) {
+            value = suggestion.data as { id: number; name: string };
+        } else {
+            value = typeof suggestion.id === 'number' ? suggestion.id : String(suggestion.id);
+        }
+        displayValue = suggestion.label;
     }
 
     // Focus the input when the component mounts
     onMount(() => {
         inputElement?.focus();
+        // Set initial display value based on value type
+        if (typeof value === 'object' && value !== null) {
+            displayValue = value.name;
+        } else if (typeof value === 'string') {
+            displayValue = value;
+        } else if (typeof value === 'number') {
+            displayValue = String(value);
+        }
     });
 </script>
 
@@ -73,11 +103,12 @@
     <input 
         type="text" 
         bind:this={inputElement}
-        {value}
+        bind:value={displayValue}
         autocomplete="off"
         {placeholder}
         on:input={handleInput}
         on:keydown={handleKeydown}
+        class={class_name}
     />
     {#if showSuggestions && suggestions.length > 0}
         <ul class="suggestions-list">

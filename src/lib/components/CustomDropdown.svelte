@@ -21,6 +21,10 @@
     export let name: string = '';
     export let id: string = '';
     export let class_name: string = '';
+    export let required: boolean = false;
+    export let style: string = 'width: 100%;';
+    export let title: string = '';
+
 
     let isOpen = false;
     let selectedLabel = '';
@@ -152,11 +156,13 @@
     bind:this={dropdownRef}
     use:clickOutside={() => isOpen = false}
     on:keydown={handleKeydown}
+    style={style}
     role="combobox"
     aria-expanded={isOpen}
     aria-haspopup="listbox"
     aria-controls="dropdown-list"
     tabindex="0"
+    title={title}
 >
     <div class="dropdown-header" on:click={toggleDropdown}>
         <span class="selected-value">{selectedLabel || placeholder}</span>
@@ -203,6 +209,8 @@
 
     <input 
         type="hidden" 
+        class="custom-dropdown-input"
+        class:required={required ? 'required' : 'not-required'}
         {name} 
         {id} 
         {value} 

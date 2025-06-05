@@ -4,11 +4,17 @@
   --color-primary-hover: #1ba8b8;
   --color-bg-primary: #f6f6f6;
   --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f6f6f6;
   --color-bg-tertiary: #2f2f2f;
   --color-text-primary: #0f0f0f;
   --color-text-secondary: #666666;
   --color-border: #e0e0e0;
   --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-error: #ff0000;
+  --color-error-hover: #cc0000;
+  --color-error-text: #ffffff;
+  --color-error-dark: #800000;
+  --color-error-dark-transparent: rgba(255, 0, 0, 0.1);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -31,8 +37,10 @@
   :root {
     --color-bg-primary: #2f2f2f;
     --color-bg-secondary: #1a1a1a;
+    --color-bg-tertiary: #2f2f2f;
     --color-text-primary: #f6f6f6;
     --color-text-secondary: #a0a0a0;
+    --color-text-tertiary: #f6f6f6;
     --color-border: #404040;
     --color-shadow: rgba(0, 0, 0, 0.3);
   }

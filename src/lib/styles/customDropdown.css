@@ -2,6 +2,7 @@
     position: relative;
     width: 100%;
     user-select: none;
+    isolation: isolate;
 }
 
 .dropdown-header {
@@ -45,8 +46,9 @@
     border-radius: var(--radius-sm);
     max-height: 200px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 9999;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    isolation: isolate;
 }
 
 .dropdown-group {
