@@ -1,12 +1,14 @@
 <script lang="ts">
     import { activeTab, categories } from '$lib/stores/tabStore';
     import AutocompleteInput from '$lib/components/AutocompleteInput.svelte';
-    import { getCampaignNames, type CampaignName } from '$lib/utils/campaigns';
+    import { getCampaignNames, createCampaign, type CampaignName } from '$lib/utils/campaigns';
     import { onMount } from 'svelte';
     import  CustomDropdown from '$lib/components/CustomDropdown.svelte'; 
     import DropdownGroup from  '$lib/components/CustomDropdown.svelte';
     import { getLocations } from '$lib/utils/region';
     import { getCalendars } from '$lib/utils/calendars';
+    import { getHouseRules } from '$lib/utils/houseRules';
+    import { getWorlds, checkWorldCount } from '$lib/utils/world';
     import { invoke } from '@tauri-apps/api/core';
     import '$lib/styles/tabs.css';
 
@@ -17,23 +19,30 @@
     let formPage: number = 1;
     let loadedCampaigns: CampaignName[] = [];
     let dropdownOptions: { value: number; label: string }[] = [];
-    let locationDropdownOptions: { value: number; label: string }[] = [];
-    let locationSuggestions: { name: string, id: number }[] = [];
-    let calendarSuggestions: { name: string, id: number }[] = [];
     let campaignId: number = 0;
     let locationObject: { id: number, name: string } = { id: 0, name: '' };
     let calendarObject: { id: number, name: string } = { id: 0, name: '' };
+    let houseRulesObject: { id: number, name: string } = { id: 0, name: '' };
+    let worldObject: { id: number, name: string } = { id: 0, name: '' };
     let campaignTypeOptions = new Array<DropdownGroup>();
+    let campaignTypeOption: { reset: () => void };
     let campaignType: string = 'other';
     let themes: string[] = [];
     let tones: string[] = [];
     let winConditions: string[] = [];
+    let worldSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let showWorldSuggestions = false;
 
     onMount(() => {
         getCampaignsFromDatabase();
         setCampaignTypeOptions();
     });
 
+    /**
+     * Handles the keydown event
+     * @param event
+     * @param tabId
+     */
     function handleKeydown(event: KeyboardEvent, tabId: string) {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -41,6 +50,9 @@
         }
     }
 
+    /**
+     * Gets the campaigns from the database
+     */
     function getCampaignsFromDatabase() {
         getCampaignNames().then((campaigns) => {
             loadedCampaigns = campaigns;
@@ -51,6 +63,9 @@
         });
     }
 
+    /**
+     * Sets the campaign type options
+     */
     function setCampaignTypeOptions() {
 
         campaignTypeOptions = [
@@ -89,10 +104,18 @@
             }
         ];
     }
+
+    /**
+     * Handles the selection of a campaign type from the dropdown
+     * @param event
+     */
     function handleCampaignChange(event: CustomEvent<{ value: string | number; label: string }>) {
         campaignId = Number(event.detail.value);
     }
 
+    /**
+     * Opens the new campaign dialog
+     */
     function handleCreateNewCampaign() {
         console.log('Create new campaign clicked');
         const dialog = document.getElementById('new-campaign-dialog');
@@ -101,26 +124,70 @@
         }
     }
 
-    function handleCreateNewCampaignSubmit(event: Event) {
+    /**
+     * Handles the submission of the new campaign form
+     * @param event
+     */
+    async function handleCreateNewCampaignSubmit(event: Event) {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
-        const campaignName = formData.get('campaignName') as string;
-        const campaignDescription = formData.get('campaignDescription') as string;
+        const newCampaignName = formData.get('campaignName') as string;
+        const newCampaignDescription = formData.get('campaignDescription') as string;
         const newCampaignType = campaignType;
-        console.log(campaignName, campaignDescription, newCampaignType);
+        const newPartySize = formData.get('partySize') as string;
+        const newPartyLevel = formData.get('partyLevel') as string;
+        const newThemes = themes.join(', ');
+        const newTones = tones.join(', ');
+        const newWinConditions = winConditions.join(', ');
+        const newSessionZeroNotes = formData.get('sessionZeroNotes') as string;
+        const newPlayerAgreements = formData.get('playerAgreements') as string;
+        const newDifficultyLevel = formData.get('difficultyLevel') as string;
+        const newStartingLocation = locationObject.name;
+        const newCalendar = calendarObject.name;
+        const newHouseRules = houseRulesObject.name;
+
+        const newCampaignId = await createCampaign(newCampaignName, newCampaignDescription, 1, newCampaignType, newPartySize, newPartyLevel, newThemes, newTones, newWinConditions, newSessionZeroNotes, newPlayerAgreements, newDifficultyLevel, newStartingLocation, newCalendar, newHouseRules);
+
+        console.log(newCampaignName, newCampaignDescription, newCampaignType, newPartySize, newPartyLevel, newThemes, newTones, newWinConditions, newSessionZeroNotes, newPlayerAgreements, newDifficultyLevel, newStartingLocation, newCalendar, newHouseRules);
+
+        // TODO: Create campaign
     }
 
+    /**
+     * Handles the selection of a campaign type
+     * @param event
+     */
     function handleCampaignTypeChange(event: CustomEvent<{ value: string | number; label: string }>) {
         campaignType = event.detail.value as string;
     }
 
+    /**
+     * Closes the new campaign dialog
+     * Resets the form
+     */
     function closeDialog() {
         const dialog = document.getElementById('new-campaign-dialog');
         if (dialog) {
+            dialog.getElementsByTagName('form')[0].reset();
+            locationObject = { id: 0, name: '' };
+            calendarObject = { id: 0, name: '' };
+            houseRulesObject = { id: 0, name: '' };
+            themes = [];
+            tones = [];
+            campaignType = 'other';
+            campaignId = 0;
+            winConditions = [];
+            formPage = 2;
+            getPreviousFormPage();
             dialog.close();
         }
     }
 
+    /**
+     * Adds a value to an array
+     * @param array
+     * @param value
+     */
     function addToArray(array: string[], value: string) {
         if (value.trim() !== '') {
             array = [...array, value];
@@ -129,10 +196,19 @@
         return array;
     }
 
+    /**
+     * Removes a value from an array
+     * @param array
+     * @param value
+     */
     function removeFromArray(array: string[], value: string) {
         return array.filter(item => item !== value);
     }
 
+    /**
+     * Handles the input of a theme
+     * @param event
+     */
     function handleThemeInput(event: KeyboardEvent) {
         if (event.key === 'Enter') {
             const input = event.target as HTMLInputElement;
@@ -141,6 +217,10 @@
         }
     }
 
+    /**
+     * Handles the input of a tone
+     * @param event
+     */
     function handleToneInput(event: KeyboardEvent) {
 
         if (event.key === 'Enter') {
@@ -150,6 +230,10 @@
         }
     }
 
+    /**
+     * Highlights unfilled elements
+     * @param elements
+     */
     function highlightUnfilledElements(elements: Element[]) {
         console.log("elements", elements);
         elements.forEach(element => {
@@ -161,6 +245,7 @@
             window.setTimeout(() => {
                 if(element.classList.contains('custom-dropdown-input')) {
                     element.parentElement?.firstElementChild?.classList.remove('unfilled');
+                    element.parentElement?.firstElementChild?.classList.add('required');
                 } else {
                     element.classList.remove('unfilled');
                 }
@@ -168,6 +253,10 @@
         });
     }
 
+    /**
+     * Handles the selection of a next form page
+     * and highlights unfilled elements
+     */
     function getNextFormPage() {
         let formPages = Array.from(document.querySelectorAll('.campaign-form-container'));
         let currentFormPage = document.getElementById('new-campaign-form-page' + formPage);
@@ -177,27 +266,36 @@
         let currentUnfilledDropdowns = Array.from(currentFormElements).filter(element => element.classList.contains('custom-dropdown-input'));
         currentUnfilledDropdowns = currentUnfilledDropdowns.filter(element => element.value == '' || element.value == 0 || element.value == null || element.textContent?.startsWith('Select'));
         let newCurrentUnfilledElements: Element[] = [...currentUnfilledElements, ...currentUnfilledDropdowns];
-        console.log("currentUnfilledElements", newCurrentUnfilledElements);
 
         newCurrentUnfilledElements = newCurrentUnfilledElements.filter(element => element.classList.contains("required"));
 
         if (newCurrentUnfilledElements.length > 0) {
-            console.log("highlighting unfilled elements", newCurrentUnfilledElements);
+            const unfilledText = document.querySelector('.unfilled-text');
+            unfilledText?.classList.remove('invisible');
             highlightUnfilledElements(newCurrentUnfilledElements);
-            //return;
+            return;
+        } else {
+            const unfilledText = document.querySelector('.unfilled-text');
+            unfilledText?.classList.add('invisible');
         }
-
-        //onsole.log("currentUnfilledElements", currentUnfilledElements);
-
-
-
-
 
         formPage++;
 
-        console.log("formPages",formPages);
+        if (formPage > 0) {
+            const backButton = document.querySelector('.back-button');
+            backButton?.classList.remove('invisible');
+            const nextButton = document.querySelector('.next-button');
+            nextButton?.classList.add('button-short');
+            nextButton?.classList.add('button-right');
+        } else {
+            const backButton = document.querySelector('.back-button');
+            backButton?.classList.add('invisible');
+            const nextButton = document.querySelector('.next-button');
+            nextButton?.classList.remove('button-short');
+            nextButton?.classList.remove('button-right');
+        }
+
         formPages.forEach(page => {
-            console.log("page",page);
             page.classList.add('invisible');
         });
         formPages[formPage - 1].classList.remove('invisible');
@@ -207,14 +305,89 @@
         }
     }
 
+    /**
+     * Handles the selection of a previous form page
+     */
+    function getPreviousFormPage() {
+        let formPages = Array.from(document.querySelectorAll('.campaign-form-container'));
+        formPage--;
+        
+        if (formPage <= 1) {
+            const backButton = document.querySelector('.back-button');
+            backButton?.classList.add('invisible');
+            const nextButton = document.querySelector('.next-button');
+            nextButton?.classList.remove('button-short');
+            nextButton?.classList.remove('button-right');
+        }
+
+        if(formPage < formPages.length) {
+            const createCampaignButton = document.querySelector('.create-campaign-button');
+            createCampaignButton?.classList.add('invisible');
+            const nextButton = document.querySelector('.next-button');
+            nextButton?.classList.remove('invisible');
+        }
+
+        formPages.forEach(page => {
+            page.classList.add('invisible');
+        });
+        formPages[formPage - 1].classList.remove('invisible');
+        if (formPage === formPages.length) {
+            const createCampaignButton = document.querySelector('.create-campaign-button');
+            createCampaignButton?.classList.remove('invisible');
+        }
+    }
+
+    /**
+     * Handles the selection of a location from the autocomplete input
+     * @param item
+     */
     function handleLocationSelect(item: { id: number | string, label: string, data: any }) {
         locationObject = { id: Number(item.id), name: item.label };
         console.log("locationObject", locationObject);
     }
 
+    /**
+     * Handles the selection of a calendar from the autocomplete input
+     * @param item
+     */
     function handleCalendarSelect(item: { id: number | string, label: string, data: any }) {
         calendarObject = { id: Number(item.id), name: item.label };
         console.log("calendarObject", calendarObject);
+    }
+
+    /**
+     * Handles the selection of a house rule from the autocomplete input
+     * @param item
+     */
+    function handleHouseRulesSelect(item: { id: number | string, label: string, data: any }) {
+        houseRulesObject = { id: Number(item.id), name: item.label };
+        console.log("houseRulesObject", houseRulesObject);
+    }
+
+    /**
+     * Handles the selection of a world from the autocomplete input
+     * @param item
+     */
+    function handleWorldSelect(item: { id: number | string, label: string, data: any }) {
+        worldObject = { id: Number(item.id), name: item.label };
+        console.log("worldObject", worldObject);
+    }
+
+    async function countReturnedObject(promise: Promise<{ count: number }>): Promise<number> {
+        const result = await promise;
+        return result.count;
+    }
+
+    async function loadWorldSuggestions() {
+        if(worldObject.id == 0 || worldObject.id == null || worldObject.id == undefined) {
+            const worlds = await getWorlds("");
+            worldSuggestions = worlds.map(world => ({
+                id: world.id,
+                label: world.name,
+                data: world
+            }));
+            showWorldSuggestions = true;
+        }
     }
 </script>
 
@@ -257,7 +430,7 @@
         <!--+ Campaign Name, Description, Type, Party Size, Party Level -->
         <div class="campaign-form-container" id="new-campaign-form-page1">
             <input required class="dialog-input required" name="campaignName" autocomplete="off" autofocus={true} type="text" title="Campaign Name" placeholder="Campaign Name" />
-            <textarea required class="dialog-input required" name="campaignDescription" autocomplete="off" title="Campaign Description" placeholder="Campaign Description"></textarea>
+            <textarea required class="dialog-input" name="campaignDescription" autocomplete="off" title="Campaign Description" placeholder="Campaign Description"></textarea>
             
             <div class="separator"></div>
 
@@ -266,7 +439,7 @@
                     options={campaignTypeOptions}
                     value={campaignId}
                     style="width: 85%; left: 50%; transform: translateX(-50%);"
-                    placeholder="Select a campaign"
+                    placeholder="Select a campaign type"
                     on:change={handleCampaignTypeChange}
                     class_name="campaign-type-dropdown"
                     title="Campaign Type"
@@ -278,9 +451,29 @@
         </div>
 
 
-        <!--+ Themes, Tones -->
+        <!--+ World, Themes, Tones -->
         <div class="campaign-form-container invisible" id="new-campaign-form-page2">
             <!-- Add theme inserter -->
+
+            <AutocompleteInput
+                class_name="world-autocomplete-container"
+                searchFn={getWorlds}
+                on:click={async () => { 
+                    const count = await countReturnedObject(checkWorldCount());
+                    if(count < 4) { 
+                        await loadWorldSuggestions();
+                    }
+                }}
+                bind:value={worldObject}
+                placeholder="Enter world name..."
+                onSelect={handleWorldSelect}
+                icon="earth-line"
+                externalSuggestions={worldSuggestions}
+                forceShowSuggestions={showWorldSuggestions}
+            />
+
+            <div class="separator"></div>
+
             <div class="form-group">
                 <label for="themes">Themes</label>
                 <div class="array-container theme-container">
@@ -324,14 +517,18 @@
         <div class="campaign-form-container invisible" id="new-campaign-form-page3">
             <div class="form-group">
                 <label for="campaign-setting">Starting Location</label>
+                <div class="formline-container">
                 <AutocompleteInput
                     class_name="location-autocomplete-container"
                     searchFn={getLocations}
                     bind:value={locationObject}
                     placeholder="Enter location name..."
                     onSelect={handleLocationSelect}
+                    icon="globe-line"
                 />
+                <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
             </div>
+        </div>
 
             <div class="separator"></div>
 
@@ -357,11 +554,11 @@
 
         <!--+ Session Zero Notes, Player Agreements -->
         <div class="campaign-form-container invisible" id="new-campaign-form-page4">
-            <textarea class="dialog-input required" name="sessionZeroNotes" autocomplete="off" title="Session Zero Notes" placeholder="Session Zero Notes"></textarea>
+            <textarea class="dialog-input" name="sessionZeroNotes" autocomplete="off" title="Session Zero Notes" placeholder="Session Zero Notes"></textarea>
             
             <div class="separator"></div>
             
-            <textarea class="dialog-input required" name="playerAgreements" autocomplete="off" title="Player Agreements" placeholder="Player Agreements"></textarea>
+            <textarea class="dialog-input" name="playerAgreements" autocomplete="off" title="Player Agreements" placeholder="Player Agreements"></textarea>
 
         </div>
 
@@ -369,21 +566,59 @@
         <div class="campaign-form-container invisible" id="new-campaign-form-page5">
             <div class="form-group">
                 <label for="calendar">Calendar</label>
+                <div class="formline-container">
                 <AutocompleteInput
                     class_name="calendar-autocomplete-container"
                     searchFn={getCalendars}
                     bind:value={calendarObject}
                     placeholder="Enter calendar name..."
                     onSelect={handleCalendarSelect}
+                    icon="calendar-line"
                 />
+                <button class="circle-button add-calendar-button" title="Add new Calendar" type="button" on:click={() => { addCalendar(); }}>+</button>
+                </div>
             </div>
+
+            <div class="separator"></div>
+
+            <div class="form-group">
+                <label for="house-rules">House Rules</label>
+                <div class="formline-container">
+                <AutocompleteInput
+                    class_name="house-rules-autocomplete-container"
+                    searchFn={getHouseRules}
+                    bind:value={houseRulesObject}
+                    placeholder="Enter house rules..."
+                    onSelect={handleHouseRulesSelect}
+                    icon="home-gear-line"
+                />
+                <button class="circle-button add-house-rules-button" title="Add new House Rules" type="button" on:click={() => { addHouseRules(); }}>+</button>
+                </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <select class="dialog-input" name="difficultyLevel" title="Difficulty Level">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="insane">Insane</option>
+                <option value="nightmare">Nightmare</option>
+                <option value="custom">Custom</option>
+            </select>
         </div>
 
 
 
 
-        <button class="next-button" type="button" on:click={() => getNextFormPage()}>Next</button>
-        <button class="create-campaign-button invisible" type="submit">Create</button>
+        <div class="bottom-container">
+            <p class="unfilled-text invisible">Please fill out all required fields</p>
+            <div class="button-container">
+                <button class="back-button invisible" type="button" on:click={() => getPreviousFormPage()}>Back</button>
+                <button class="next-button" type="button" on:click={() => getNextFormPage()}>Next</button>
+            </div>
+        </div>
+        <button class="create-campaign-button button-short button-right invisible" type="submit">Create</button>
     </form>
 </dialog>
 

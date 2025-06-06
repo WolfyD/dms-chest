@@ -5,9 +5,9 @@
   --color-bg-primary: #f6f6f6;
   --color-bg-secondary: #ffffff;
   --color-bg-tertiary: #f6f6f6;
-  --color-bg-tertiary: #2f2f2f;
   --color-text-primary: #0f0f0f;
   --color-text-secondary: #666666;
+  --color-text-tertiary: #f6f6f6;
   --color-border: #e0e0e0;
   --color-shadow: rgba(0, 0, 0, 0.1);
   --color-error: #ff0000;
@@ -30,6 +30,17 @@
 
   /* Transitions */
   --transition-default: all 0.2s ease-in-out;
+
+  /* Typography */
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Dark mode overrides */

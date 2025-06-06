@@ -106,10 +106,12 @@
 
 .campaign-form-container input, 
 .campaign-form-container textarea, 
+.campaign-form-container select,
 .campaign-form-container .add-array-input,
 .campaign-form-container .dropdown-header,
 .create-campaign-button,
-.next-button {
+.next-button,
+.back-button {
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -117,6 +119,14 @@
     margin: 0 auto;
     resize: vertical;
     background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.campaign-form-container select {
+    color: var(--color-text-primary) !important;
+}
+
+.campaign-form-container select option {
     color: var(--color-text-primary) !important;
 }
 
@@ -128,6 +138,7 @@
 }
 
 .create-campaign-button,
+.back-button,
 .next-button {
     width: 40%;
     display: block;
@@ -146,7 +157,8 @@
 }
 
 .create-campaign-button:hover,
-.next-button:hover {
+.next-button:hover,
+.back-button:hover {
     background-color: var(--color-primary) !important;
 }
 
@@ -213,7 +225,8 @@
 }
 
 .create-campaign-button:hover,
-.next-button:hover {
+.next-button:hover,
+.back-button:hover {
     background-color: var(--color-primary);
     
     transition: var(--transition-default) !important;
@@ -238,13 +251,13 @@
 
 .required {
     position: relative;
-    transition: 1s !important;
+    transition: 10s !important;
 }
 
 .unfilled {
     position: relative;
     margin-left: 0px;
-    border-left: 4px solid var(--color-error-dark) !important;
+    border-left: 10px solid var(--color-error-dark) !important;
     transition: .5s !important;
 }
 
@@ -291,7 +304,9 @@ dialog::backdrop {
 }
 
 .location-autocomplete-container,
-.calendar-autocomplete-container {
+.calendar-autocomplete-container,
+.house-rules-autocomplete-container,
+.world-autocomplete-container {
     display: flex;
     position: relative;
     gap: var(--spacing-sm);
@@ -313,10 +328,95 @@ dialog::backdrop {
     height: 1px;
     background-color: var(--color-text-secondary);
     box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-    margin: 7px auto;
+    margin: 17px auto;
     filter: blur(.5px);
 }
 
+.circle-button {
+    -width: 30px;
+    -height: 30px;
+    border-radius: 50%;
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-text-primary);
+    font-size: 1.45em;
+    margin-left: 10px;
+    cursor: pointer;
+    padding: 7px;
+    margin: 0;
+    line-height: 13px;
+    right: 10%;
+    position: absolute;
+
+    transition: var(--transition-default) !important;
+}
+
+.circle-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-bg-primary);
+    transition: var(--transition-default) !important;
+}
+
+.circle-button:active {
+    background-color: var(--color-primary-dark, #00aaaa);
+    color: var(--color-bg-primary);
+    transition: var(--transition-default) !important;
+}
+
+.bottom-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.unfilled-text {
+    display: block;
+    color: var(--color-error-dark);
+    font-size: .8em;
+    margin-left: 10px;
+    position: absolute;
+    bottom: 30px;
+}
+
+.button-short {
+    width: 30%;
+    transition-property: width !important;
+    transition-duration: .5s !important;
+}
+
+.button-right {
+    margin-left: 5%;
+    transition-property: margin-left !important;
+    transition-duration: .5s !important;
+
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.back-button {
+    margin-left: -15%;
+    width: 10%;
+
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: 1px dotted #777777AA !important;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-sm);
+}
+
+button,
+label,
+h2,
+p {
+    user-select: none;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

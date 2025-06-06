@@ -688,3 +688,31 @@ export function createAutocomplete(
 	};
 }
 
+export async function getWorlds(name: string): Promise<{ name: string, id: number }[]> {
+	try {
+		const results = await invoke<Array<{ name: string, id: number }>>('query_database', {
+			query: "SELECT name, id FROM worlds WHERE deleted_at IS NULL AND name LIKE '%' || ? || '%'",
+			params: [name]
+		});
+
+		return results.map(row => ({ name: row.name, id: row.id }));
+	} catch (error) {
+		console.error('Failed to query database:', error);
+		throw error;
+	}
+}
+
+export async function checkWorldCount(): Promise<{ count: number }> {
+	try {
+		const results = await invoke<Array<{ count: number }>>('query_database_no_params', {
+			query: "SELECT COUNT(*) as count FROM worlds WHERE deleted_at IS NULL",
+		});
+
+		return { count: results[0].count };
+	} catch (error) {
+		console.error('Failed to query database:', error);
+		throw error;
+	}
+}
+
+

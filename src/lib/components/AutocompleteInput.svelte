@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createDebouncedAutocomplete, type SuggestionItem } from '$lib/utils/debouncedAutocomplete';
-    import { onMount } from 'svelte';
+    import { onMount, createEventDispatcher } from 'svelte';
 
     // Props
     export let searchFn: (text: string) => Promise<any[]>;
@@ -10,6 +10,12 @@
     export let value: string | number | { id: number; name: string } = '';
     export let onSelect: (item: SuggestionItem<any>) => void = () => {};
     export let class_name: string = '';
+    export let icon: string = '';
+    export let externalSuggestions: SuggestionItem<any>[] = [];
+    export let forceShowSuggestions = false;
+
+    // Create event dispatchers
+    const dispatch = createEventDispatcher();
 
     // Local state
     let suggestions: SuggestionItem<any>[] = [];
@@ -17,6 +23,17 @@
     let selectedIndex = -1;
     let inputElement: HTMLInputElement;
     let displayValue = '';
+
+    // Watch for external suggestions changes
+    $: if (externalSuggestions.length > 0) {
+        suggestions = externalSuggestions;
+        showSuggestions = true;
+    }
+
+    // Watch for force show suggestions
+    $: if (forceShowSuggestions) {
+        showSuggestions = true;
+    }
 
     // Create autocomplete instance
     const autocomplete = createDebouncedAutocomplete(searchFn, {
@@ -100,16 +117,23 @@
 </script>
 
 <div class="autocomplete-container">
-    <input 
-        type="text" 
-        bind:this={inputElement}
-        bind:value={displayValue}
-        autocomplete="off"
-        {placeholder}
-        on:input={handleInput}
-        on:keydown={handleKeydown}
-        class={class_name}
-    />
+    <div class="input-wrapper">
+        <input 
+            type="text" 
+            bind:this={inputElement}
+            bind:value={displayValue}
+            autocomplete="off"
+            {placeholder}
+            on:input={handleInput}
+            on:keydown={handleKeydown}
+            on:focus={() => dispatch('focus')}
+            on:click={() => dispatch('click')}
+            class={class_name}
+        />
+        {#if icon}
+            <i class="ri-{icon}"></i>
+        {/if}
+    </div>
     {#if showSuggestions && suggestions.length > 0}
         <ul class="suggestions-list">
             {#each suggestions as suggestion, i}
@@ -142,6 +166,27 @@
         border-radius: var(--radius-sm);
         background: var(--color-bg-secondary);
         color: var(--color-text-primary);
+        justify-self: stretch;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: inline-flexbox;
+        align-items: center;
+        justify-content: stretch;
+        justify-items: stretch;
+        justify-self: stretch;
+        width: 100%;
+    }
+
+    i {
+        position: absolute;
+        font-size: 1.4rem;
+        right: 15%;
+        top: 50%;
+        transform: translateY(-55%);
+        color: var(--color-text-secondary);
+        pointer-events: none;
     }
 
     .suggestions-list {
