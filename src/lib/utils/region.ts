@@ -109,7 +109,48 @@ type Level = {
       throw error;
     }
   }
-  
+
+  /**
+   * Check the number of locations in the database
+   * @returns { count: number }
+   */
+  export async function checkLocationCount(): Promise<{ count: number }> {
+    try {
+      const results = await invoke<Array<{ count: number }>>('query_database_no_params', {
+        query: "SELECT COUNT(*) as count FROM locations WHERE deleted_at IS NULL",
+      });
+
+      return { count: results[0].count };
+    } catch (error) {
+      console.error('Failed to query database:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the first n locations in the database
+   * @param n 
+   * @returns 
+   */
+  export async function getFirstNLocations(n: number): Promise<{ name: string, id: number }[]> {
+    try {
+      const results = await invoke<Array<{ name: string, id: number }>>('query_database', {
+        query: "SELECT name, id FROM locations WHERE deleted_at IS NULL ORDER BY id ASC LIMIT ?",
+        params: [n.toString()]
+      });
+
+      return results.map(row => ({ name: row.name, id: row.id }));
+    } catch (error) {
+      console.error('Failed to query database:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the parents of a location
+   * @param id 
+   * @returns 
+   */
   export async function getLocationParents(id: number): Promise<{ name: string, id: number, type: string, parent_id: number, has_parent: boolean, has_children: boolean }[]> {
   
     console.log("getLocationParents", id);
@@ -162,6 +203,11 @@ type Level = {
     }
   }
 
+  /**
+   * Get the children of a location
+   * @param id 
+   * @returns 
+   */
   export async function getLocationChildren(id: number): Promise<{ name: string, id: number, type: string, parent_id: number, has_parent: boolean, has_children: boolean }[]> {
   
     console.log("getLocationChildren", id);

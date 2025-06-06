@@ -138,23 +138,16 @@ pub fn get_migration() -> Migration {
                 FOREIGN KEY (race_id) REFERENCES races(id)
             );
 
-            
-            
-
-            
-            
-
-
-
-
-
 
         ".to_string(),
-        down_sql: "
+            down_sql: "
             DROP TABLE IF EXISTS players;
             DROP TABLE IF EXISTS player_availability;
             DROP TABLE IF EXISTS characters;
             DROP TABLE IF EXISTS character_details;
+            DROP TABLE IF EXISTS races;
+            DROP TABLE IF EXISTS race_details;
+            DROP TABLE IF EXISTS race_traits;
         ".to_string(),
     }
 } 

@@ -26,4 +26,19 @@ export async function getHouseRules(name: string): Promise<{ name: string, id: n
   }
 }
   
-  
+  /**
+   * Check the number of house rules in the database
+   * @returns { count: number }
+   */
+  export async function checkHouseRuleCount(): Promise<{ count: number }> {
+    try {
+      const results = await invoke<Array<{ count: number }>>('query_database_no_params', {
+        query: "SELECT COUNT(*) as count FROM house_rules WHERE deleted_at IS NULL",
+      });
+
+      return { count: results[0].count };
+    } catch (error) {
+      console.error('Failed to query database:', error);
+      throw error;
+    }
+  }

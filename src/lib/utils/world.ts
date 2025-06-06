@@ -471,8 +471,6 @@ export async function getRandomSpecies(): Promise<{ dominantSpecies: string[], o
 	// Get list of races from the database
 	const races: string[] = await getRaces().then(races => races);
 
-	console.log("====>races", races);
-
 	let dominantSpecies: string[] = [];
 	let otherSpecies: string[] = [];	
 	
@@ -624,6 +622,12 @@ export interface AutocompleteState {
 	selected?: { name: string, id: number };
 }
 
+/**
+ * Create an autocomplete function
+ * @param searchFn 
+ * @param debounceTime 
+ * @returns 
+ */
 export function createAutocomplete(
 	searchFn: (text: string) => Promise<{ name: string, id: number }[]>,
 	debounceTime: number = 300
@@ -688,6 +692,11 @@ export function createAutocomplete(
 	};
 }
 
+/**
+ * Get the worlds from the database
+ * @param name 
+ * @returns 
+ */
 export async function getWorlds(name: string): Promise<{ name: string, id: number }[]> {
 	try {
 		const results = await invoke<Array<{ name: string, id: number }>>('query_database', {
@@ -702,6 +711,10 @@ export async function getWorlds(name: string): Promise<{ name: string, id: numbe
 	}
 }
 
+/**
+ * Check the number of worlds in the database
+ * @returns { count: number }
+ */
 export async function checkWorldCount(): Promise<{ count: number }> {
 	try {
 		const results = await invoke<Array<{ count: number }>>('query_database_no_params', {

@@ -132,7 +132,7 @@ pub fn get_database_state() -> DatabaseState {
 }
 
 #[tauri::command]
-pub async fn query_database(state: State<'_, DatabaseState>, query: String, params: Vec<String>) -> Result<Vec<serde_json::Value>, String> {
+pub async fn query_database(state: State<'_, DatabaseState>, query: String, params: Vec<serde_json::Value>) -> Result<Vec<serde_json::Value>, String> {
     let conn = state.0.lock()
         .map_err(|_| DatabaseError::LockError("Failed to acquire database lock".to_string()))
         .map_err(|e| e.to_string())?;
@@ -144,6 +144,25 @@ pub async fn query_database(state: State<'_, DatabaseState>, query: String, para
     let column_names: Vec<String> = (0..column_count)
         .map(|i| stmt.column_name(i).unwrap_or("").to_string())
         .collect();
+    
+    // Convert serde_json::Value parameters to rusqlite::params
+    let params: Vec<Box<dyn rusqlite::ToSql>> = params.into_iter().map(|param| {
+        match param {
+            serde_json::Value::Null => Box::new(Option::<String>::None) as Box<dyn rusqlite::ToSql>,
+            serde_json::Value::Bool(b) => Box::new(b) as Box<dyn rusqlite::ToSql>,
+            serde_json::Value::Number(n) => {
+                if let Some(i) = n.as_i64() {
+                    Box::new(i) as Box<dyn rusqlite::ToSql>
+                } else if let Some(f) = n.as_f64() {
+                    Box::new(f) as Box<dyn rusqlite::ToSql>
+                } else {
+                    Box::new(n.to_string()) as Box<dyn rusqlite::ToSql>
+                }
+            },
+            serde_json::Value::String(s) => Box::new(s) as Box<dyn rusqlite::ToSql>,
+            _ => Box::new(param.to_string()) as Box<dyn rusqlite::ToSql>,
+        }
+    }).collect();
     
     let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
         let mut map = serde_json::Map::new();
@@ -167,7 +186,7 @@ pub async fn query_database(state: State<'_, DatabaseState>, query: String, para
     .map_err(|e| e.to_string())?;
 
     Ok(rows)
-} 
+}
 
 #[tauri::command]
 pub async fn query_database_no_params(state: State<'_, DatabaseState>, query: String) -> Result<Vec<serde_json::Value>, String> {

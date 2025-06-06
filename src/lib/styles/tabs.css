@@ -1,7 +1,12 @@
+.app-header {
+    width: 100%;
+}
+
 .tabs-container {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    width: 90%;
 }
 
 .tab {
@@ -13,7 +18,7 @@
     border-radius: var(--radius-md);
     transition: var(--transition-default);
     cursor: pointer;
-    width: 85%;
+    width: 90%;
 }
 
 .tab .category-name {
@@ -90,6 +95,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    padding-bottom: 80px;
 }
 
 .campaign-form-container, 
@@ -192,9 +198,13 @@
 .array-list {
     display: flex;
     flex-direction: column;
+    flex-wrap: nowrap;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-sm);
     margin-left: 10px;
+    overflow-y: auto;
+    max-height: 140px;
+    width: 80%;
 }
 
 .array-item {
@@ -202,7 +212,7 @@
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     display: flex;
-    width: 60%;
+    width: 80%;
     color: var(--color-text-primary);
     background-color: var(--color-bg-secondary);
     margin-left: 9%;
@@ -251,12 +261,15 @@
 
 .required {
     position: relative;
-    transition: 10s !important;
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+    transition-property: margin-left !important;
+    transition: 1s !important;
 }
 
-.unfilled {
+.unfilled,
+.campaign-type-dropdown .dropdown-header +& .unfilled {
     position: relative;
-    margin-left: 0px;
     border-left: 10px solid var(--color-error-dark) !important;
     transition: .5s !important;
 }
@@ -267,7 +280,7 @@ dialog::backdrop {
 }
 
 .campaign-type-dropdown .dropdown-header {
-    width: 95%;
+    width: 94%;
     margin-left: 0 !important;
     position: relative !important;
     left: 50% !important;
@@ -333,8 +346,6 @@ dialog::backdrop {
 }
 
 .circle-button {
-    -width: 30px;
-    -height: 30px;
     border-radius: 50%;
     background-color: var(--color-bg-tertiary);
     color: var(--color-text-primary);
@@ -345,8 +356,9 @@ dialog::backdrop {
     padding: 7px;
     margin: 0;
     line-height: 13px;
-    right: 10%;
+    right: 8%;
     position: absolute;
+    margin-top: 2px;
 
     transition: var(--transition-default) !important;
 }

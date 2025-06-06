@@ -13,6 +13,7 @@
     export let icon: string = '';
     export let externalSuggestions: SuggestionItem<any>[] = [];
     export let forceShowSuggestions = false;
+    export let required = false;
 
     // Create event dispatchers
     const dispatch = createEventDispatcher();
@@ -129,6 +130,8 @@
             on:focus={() => dispatch('focus')}
             on:click={() => dispatch('click')}
             class={class_name}
+            class:required={required}
+            required={required}
         />
         {#if icon}
             <i class="ri-{icon}"></i>

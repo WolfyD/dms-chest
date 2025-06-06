@@ -7,7 +7,7 @@ pub fn get_migration() -> Migration {
         up_sql: "
             CREATE TABLE IF NOT EXISTS campaigns (
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
+                name TEXT NOT NULL UNIQUE,
                 description TEXT,
                 settings TEXT,
                 created_at TIMESTAMP NOT NULL,
@@ -31,7 +31,7 @@ pub fn get_migration() -> Migration {
                 player_agreements TEXT DEFAULT '',
                 calendar_id INTEGER DEFAULT 1,
                 house_rules_id INTEGER DEFAULT null,
-                difficulty_level TEXT DEFAULT 'medium' CHECK(difficulty_level IN ('easy', 'medium', 'hard', 'insane')),
+                difficulty_level INTEGER DEFAULT 3 CHECK(difficulty_level >= 1 AND difficulty_level <= 7),
                 created_at TIMESTAMP NOT NULL,
                 updated_at TIMESTAMP NOT NULL,
                 deleted_at TIMESTAMP,
@@ -338,6 +338,10 @@ pub fn get_migration() -> Migration {
             DROP TABLE IF EXISTS location_details;
             DROP TABLE IF EXISTS maps;
             DROP TABLE IF EXISTS map_details;
+            DROP TABLE IF EXISTS calendars;
+            DROP TABLE IF EXISTS calendar_details;
+            DROP TABLE IF EXISTS house_rules;
+            DROP TABLE IF EXISTS area_types;
         ".to_string(),
     }
 } 

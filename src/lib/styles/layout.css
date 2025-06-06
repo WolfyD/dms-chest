@@ -24,6 +24,7 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md);
+    padding-left: 40px;
 }
 
 /* Responsive Design */

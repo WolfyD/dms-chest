@@ -5,12 +5,13 @@
     import { onMount } from 'svelte';
     import  CustomDropdown from '$lib/components/CustomDropdown.svelte'; 
     import DropdownGroup from  '$lib/components/CustomDropdown.svelte';
-    import { getLocations } from '$lib/utils/region';
-    import { getCalendars } from '$lib/utils/calendars';
-    import { getHouseRules } from '$lib/utils/houseRules';
+    import { getLocations, checkLocationCount, getFirstNLocations } from '$lib/utils/region';
+    import { getCalendars, checkCalendarCount, getCalendarByWorldId } from '$lib/utils/calendars';
+    import { getHouseRules, checkHouseRuleCount } from '$lib/utils/houseRules';
     import { getWorlds, checkWorldCount } from '$lib/utils/world';
     import { invoke } from '@tauri-apps/api/core';
     import '$lib/styles/tabs.css';
+    import { json } from '@sveltejs/kit';
 
     function handleTabClick(tabId: string) {
         activeTab.set(tabId);
@@ -25,13 +26,18 @@
     let houseRulesObject: { id: number, name: string } = { id: 0, name: '' };
     let worldObject: { id: number, name: string } = { id: 0, name: '' };
     let campaignTypeOptions = new Array<DropdownGroup>();
-    let campaignTypeOption: { reset: () => void };
     let campaignType: string = 'other';
     let themes: string[] = [];
     let tones: string[] = [];
     let winConditions: string[] = [];
     let worldSuggestions: { id: number | string, label: string, data: any }[] = [];
     let showWorldSuggestions = false;
+    let locationSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let showLocationSuggestions = false;
+    let calendarSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let showCalendarSuggestions = false;
+    let houseRuleSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let showHouseRuleSuggestions = false;
 
     onMount(() => {
         getCampaignsFromDatabase();
@@ -136,19 +142,70 @@
         const newCampaignType = campaignType;
         const newPartySize = formData.get('partySize') as string;
         const newPartyLevel = formData.get('partyLevel') as string;
-        const newThemes = themes.join(', ');
-        const newTones = tones.join(', ');
-        const newWinConditions = winConditions.join(', ');
+        const newThemes = JSON.stringify(themes);
+        const newTones = JSON.stringify(tones);
+        const newWinConditions = JSON.stringify(winConditions);
         const newSessionZeroNotes = formData.get('sessionZeroNotes') as string;
         const newPlayerAgreements = formData.get('playerAgreements') as string;
-        const newDifficultyLevel = formData.get('difficultyLevel') as string;
-        const newStartingLocation = locationObject.name;
-        const newCalendar = calendarObject.name;
-        const newHouseRules = houseRulesObject.name;
+        const newDifficultyLevelString = formData.get('difficultyLevel') as String;
+        let newDifficultyLevel = 0;
+        switch(newDifficultyLevelString.toLowerCase()) {
+            case 'easy':
+                newDifficultyLevel = 1;
+                break;
+            case 'medium':
+                newDifficultyLevel = 2;
+                break;
+            case 'hard':
+                newDifficultyLevel = 3;
+                break;
+            case 'insane':
+                newDifficultyLevel = 4;
+                break;
+            case 'nightmare':
+                newDifficultyLevel = 5;
+                break;
+            case 'custom':
+            default:
+                newDifficultyLevel = 6;
+                break;
+        };
+        const newStartingLocation = locationObject.id == 0 ? null : locationObject.id;
+        const newCalendar = calendarObject.id == 0 ? null : calendarObject.id;
+        const newWorldId = worldObject.id;
+        const newHouseRules = houseRulesObject.id == 0 ? null : houseRulesObject.id;
+        
+        console.log("New Campaign name: " + newCampaignName, "New Campaign Description: " + newCampaignDescription, "New Campaign Type: " + newCampaignType, "New Party Size: " + newPartySize, "New Party Level: " + newPartyLevel, "New Themes: " + newThemes, "New Tones: " + newTones, "New Win Conditions: " + newWinConditions, "New Session Zero Notes: " + newSessionZeroNotes, "New Player Agreements: " + newPlayerAgreements, "New Difficulty Level: " + newDifficultyLevel, "New Starting Location: " + newStartingLocation, "New Calendar: " + newCalendar, "New World Id: " + newWorldId, "New House Rules: " + newHouseRules);
 
-        const newCampaignId = await createCampaign(newCampaignName, newCampaignDescription, 1, newCampaignType, newPartySize, newPartyLevel, newThemes, newTones, newWinConditions, newSessionZeroNotes, newPlayerAgreements, newDifficultyLevel, newStartingLocation, newCalendar, newHouseRules);
+        const newCampaignId = await createCampaign(
+            /*Campaign name*/           newCampaignName, 
+            /*CampaignDescription*/     newCampaignDescription, 
+            /*WorldId*/                 newWorldId, 
+            /*CampaignType*/            newCampaignType, 
+            /*PartySize*/               newPartySize, 
+            /*PartyLevel*/              newPartyLevel, 
+            /*Themes*/                  newThemes, 
+            /*Tones*/                   newTones, 
+            /*WinConditions*/           newWinConditions, 
+            /*SessionZeroNotes*/        newSessionZeroNotes, 
+            /*PlayerAgreements*/        newPlayerAgreements, 
+            /*DifficultyLevel*/         newDifficultyLevel, 
+            /*StartingLocation*/        newStartingLocation, 
+            /*Calendar*/                newCalendar, 
+            /*HouseRules*/              newHouseRules
+        );
 
-        console.log(newCampaignName, newCampaignDescription, newCampaignType, newPartySize, newPartyLevel, newThemes, newTones, newWinConditions, newSessionZeroNotes, newPlayerAgreements, newDifficultyLevel, newStartingLocation, newCalendar, newHouseRules);
+        if(newCampaignId == -1) {
+            alert("A campaign with this name already exists!");
+            return;
+        } else {
+            getCampaignsFromDatabase();
+            campaignId = newCampaignId;
+            closeDialog();
+        }
+
+        console.log("newCampaignId", newCampaignId);
+
 
         // TODO: Create campaign
     }
@@ -211,8 +268,11 @@
      */
     function handleThemeInput(event: KeyboardEvent) {
         if (event.key === 'Enter') {
+            event.preventDefault();
             const input = event.target as HTMLInputElement;
-            themes = [...themes, input.value];
+            if(input.value.trim() !== '') { 
+                themes = [...themes, input.value];
+            }
             input.value = '';
         }
     }
@@ -222,10 +282,27 @@
      * @param event
      */
     function handleToneInput(event: KeyboardEvent) {
-
         if (event.key === 'Enter') {
+            event.preventDefault();
             const input = event.target as HTMLInputElement;
-            tones = [...tones, input.value];
+            if(input.value.trim() !== '') {
+                tones = [...tones, input.value];
+            }
+            input.value = '';
+        }
+    }
+
+    /**
+     * Handles the input of a win condition
+     * @param event
+     */
+    function handleWinConditionInput(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const input = event.target as HTMLInputElement;
+            if(input.value.trim() !== '') {
+                winConditions = [...winConditions, input.value];
+            }
             input.value = '';
         }
     }
@@ -373,11 +450,19 @@
         console.log("worldObject", worldObject);
     }
 
+    /**
+     * Turns a returned count promise into a number
+     * @param promise
+     * @returns
+     */
     async function countReturnedObject(promise: Promise<{ count: number }>): Promise<number> {
         const result = await promise;
         return result.count;
     }
 
+    /**
+     * Loads world suggestions
+     */
     async function loadWorldSuggestions() {
         if(worldObject.id == 0 || worldObject.id == null || worldObject.id == undefined) {
             const worlds = await getWorlds("");
@@ -387,6 +472,51 @@
                 data: world
             }));
             showWorldSuggestions = true;
+        }
+    }
+
+    /**
+     * Loads the first 8 locations from the database
+     */
+    async function loadLocationSuggestions() {
+        if(locationObject.id == 0 || locationObject.id == null || locationObject.id == undefined) {
+            const locations = await getFirstNLocations(8);
+            locationSuggestions = locations.map(location => ({
+                id: location.id,
+                label: location.name,
+                data: location
+            }));
+            showLocationSuggestions = true;
+        }
+    }
+    
+    /**
+     * Loads suggestions for the calendar dropdown from the database
+     */
+    async function loadCalendarSuggestions() {
+        if(calendarObject.id == 0 || calendarObject.id == null || calendarObject.id == undefined) {
+            const calendars = await getCalendars("");
+            calendarSuggestions = calendars.map(calendar => ({
+                id: calendar.id,
+                label: calendar.name,
+                data: calendar
+            }));
+            showCalendarSuggestions = true;
+        }
+    }
+
+    /**
+     * Loads suggestions for the house rules dropdown from the database
+     */
+    async function loadHouseRuleSuggestions() {
+        if(houseRulesObject.id == 0 || houseRulesObject.id == null || houseRulesObject.id == undefined) {
+            const houseRules = await getHouseRules("");
+            houseRuleSuggestions = houseRules.map(houseRule => ({
+                id: houseRule.id,
+                label: houseRule.name,
+                data: houseRule
+            }));
+            showHouseRuleSuggestions = true;
         }
     }
 </script>
@@ -424,15 +554,16 @@
 <!--+ New Campaign Dialog -->
 <dialog id="new-campaign-dialog">
     <button class="close-button" on:click={() => closeDialog()}>X</button>
-    <form on:submit={handleCreateNewCampaignSubmit}>
+    <form on:submit|preventDefault={handleCreateNewCampaignSubmit}>
         <h2>New Campaign</h2>
 
         <!--+ Campaign Name, Description, Type, Party Size, Party Level -->
         <div class="campaign-form-container" id="new-campaign-form-page1">
             <input required class="dialog-input required" name="campaignName" autocomplete="off" autofocus={true} type="text" title="Campaign Name" placeholder="Campaign Name" />
-            <textarea required class="dialog-input" name="campaignDescription" autocomplete="off" title="Campaign Description" placeholder="Campaign Description"></textarea>
+            <textarea class="dialog-input" name="campaignDescription" autocomplete="off" title="Campaign Description" placeholder="Campaign Description"></textarea>
             
             <div class="separator"></div>
+
 
             <div class="formline-container">
                 <CustomDropdown
@@ -445,6 +576,7 @@
                     title="Campaign Type"
                 />
             </div>
+            <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
 
             <input required class="dialog-input required" type="number" name="partySize" min="1" max="20" title="Party Size" placeholder="Party Size" />
             <input required class="dialog-input required" type="number" name="partyLevel" min="1" max="20" title="Party Level" placeholder="Party Level" />
@@ -455,22 +587,26 @@
         <div class="campaign-form-container invisible" id="new-campaign-form-page2">
             <!-- Add theme inserter -->
 
-            <AutocompleteInput
-                class_name="world-autocomplete-container"
-                searchFn={getWorlds}
-                on:click={async () => { 
-                    const count = await countReturnedObject(checkWorldCount());
-                    if(count < 4) { 
-                        await loadWorldSuggestions();
-                    }
-                }}
-                bind:value={worldObject}
-                placeholder="Enter world name..."
-                onSelect={handleWorldSelect}
-                icon="earth-line"
-                externalSuggestions={worldSuggestions}
-                forceShowSuggestions={showWorldSuggestions}
-            />
+            <div class="formline-container">
+                <AutocompleteInput
+                    required={true}
+                    class_name="world-autocomplete-container"
+                    searchFn={getWorlds}
+                    on:click={async () => { 
+                        const count = await countReturnedObject(checkWorldCount());
+                        if(count < 4) { 
+                            await loadWorldSuggestions();
+                        }
+                    }}
+                    bind:value={worldObject}
+                    placeholder="Enter world name..."
+                    onSelect={handleWorldSelect}
+                    icon="earth-line"
+                    externalSuggestions={worldSuggestions}
+                    forceShowSuggestions={showWorldSuggestions}
+                />
+                <button class="circle-button add-world-button" title="Add new World" type="button" on:click={() => { addWorld(); }}>+</button>
+            </div>
 
             <div class="separator"></div>
 
@@ -518,17 +654,23 @@
             <div class="form-group">
                 <label for="campaign-setting">Starting Location</label>
                 <div class="formline-container">
-                <AutocompleteInput
-                    class_name="location-autocomplete-container"
-                    searchFn={getLocations}
-                    bind:value={locationObject}
-                    placeholder="Enter location name..."
-                    onSelect={handleLocationSelect}
-                    icon="globe-line"
-                />
-                <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
+                    <AutocompleteInput
+                        class_name="location-autocomplete-container"
+                        searchFn={getLocations}
+                        on:click={async () => { 
+                            const count = await countReturnedObject(checkLocationCount());
+                            await loadLocationSuggestions();
+                        }}
+                        bind:value={locationObject}
+                        placeholder="Enter location name..."
+                        onSelect={handleLocationSelect}
+                        icon="globe-line"
+                        externalSuggestions={locationSuggestions}
+                        forceShowSuggestions={showLocationSuggestions}
+                    />
+                    <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
+                </div>
             </div>
-        </div>
 
             <div class="separator"></div>
 
@@ -570,10 +712,18 @@
                 <AutocompleteInput
                     class_name="calendar-autocomplete-container"
                     searchFn={getCalendars}
+                    on:click={async () => { 
+                        const count = await countReturnedObject(checkCalendarCount());
+                        if(count < 4) { 
+                            await loadCalendarSuggestions();
+                        }
+                    }}
                     bind:value={calendarObject}
                     placeholder="Enter calendar name..."
                     onSelect={handleCalendarSelect}
                     icon="calendar-line"
+                    externalSuggestions={calendarSuggestions}
+                    forceShowSuggestions={showCalendarSuggestions}
                 />
                 <button class="circle-button add-calendar-button" title="Add new Calendar" type="button" on:click={() => { addCalendar(); }}>+</button>
                 </div>
@@ -587,10 +737,18 @@
                 <AutocompleteInput
                     class_name="house-rules-autocomplete-container"
                     searchFn={getHouseRules}
+                    on:click={async () => { 
+                        const count = await countReturnedObject(checkHouseRuleCount());
+                        if(count < 4) { 
+                            await loadHouseRuleSuggestions();
+                        }
+                    }}
                     bind:value={houseRulesObject}
                     placeholder="Enter house rules..."
                     onSelect={handleHouseRulesSelect}
                     icon="home-gear-line"
+                    externalSuggestions={houseRuleSuggestions}
+                    forceShowSuggestions={showHouseRuleSuggestions}
                 />
                 <button class="circle-button add-house-rules-button" title="Add new House Rules" type="button" on:click={() => { addHouseRules(); }}>+</button>
                 </div>

@@ -111,41 +111,6 @@ pub fn get_migration() -> Migration {
             INSERT INTO world_details (world_id, genre, tone, tech_level, magic_level, dominant_species, other_species, religions, pantheon, notable_landmarks, history, planar_structure, calendar_id, established_material, created_at, updated_at) VALUES 
             (1, 'Fantasy', 'Heroic', 'Medieval', 'High', '[]', '[]', '[]', '[]', '[]', '', 'Material Plane', 1, 'D&D 5e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-
-            -- Set the world_id (assuming it exists in your 'worlds' table)
-            -- For demonstration, we'll use 1.
-            -- If you need to create a 'worlds' table, it would look something like:
-            -- CREATE TABLE IF NOT EXISTS worlds (
-            --     id INTEGER PRIMARY KEY,
-            --     name TEXT NOT NULL UNIQUE,
-            --     description TEXT,
-            --     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            --     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-            -- );
-            -- INSERT INTO worlds (name, description) VALUES ('Our Universe', 'The observable universe.');
-
-            -- Pre-fetch area_type_ids for clarity and reuse in a single script
-            -- In a real application, you might cache these in your code
-            -- or use these subqueries directly as done below.
-
-            -- Astronomical Area Type IDs
-            -- SELECT id FROM area_types WHERE name = 'Supercluster';
-            -- SELECT id FROM area_types WHERE name = 'Galaxy Cluster';
-            -- SELECT id FROM area_types WHERE name = 'Galaxy Group';
-            -- SELECT id FROM area_types WHERE name = 'Galaxy';
-            -- SELECT id FROM area_types WHERE name = 'Stellar System';
-            -- SELECT id FROM area_types WHERE name = 'Planet';
-
-            -- Terrestrial Area Type IDs
-            -- SELECT id FROM area_types WHERE name = 'Continent';
-            -- SELECT id FROM area_types WHERE name = 'Country';
-            -- SELECT id FROM area_types WHERE name = 'Province';
-            -- SELECT id FROM area_types WHERE name = 'City';
-
-
-            -- Start of INSERT statements for locations and their details
-            -- Assigning explicit IDs for easier parent_id referencing
-
             -- 1. Laniakea Supercluster
             INSERT INTO locations (id, world_id, parent_id, has_parent, has_children, name, description, area_type_id, created_at, updated_at) VALUES
             (1, 1, NULL, FALSE, TRUE, 'Laniakea Supercluster', 'The galaxy supercluster that is home to the Milky Way and approximately 100,000 other galaxies.', (SELECT id FROM area_types WHERE name = 'Supercluster'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -319,7 +284,7 @@ pub fn get_migration() -> Migration {
             INSERT INTO campaign_details (campaign_id, world_id, campaign_type, party_level, party_size, themes, tone, starting_location_name, starting_location_id, win_conditions, 
             session_zero_notes, player_agreements, calendar_id, house_rules_id, difficulty_level, created_at, updated_at) VALUES 
             (1, 1, 'Adventure', 1, 4, '{}', 'Heroic', 'London', 7, '{ \"win_condition\": \"The party must save the world from the evil empire\" }', 
-            'No notes', 'One bag of chips per session', 1, 1, 'medium', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+            'No notes', 'One bag of chips per session', 1, 1, 3,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
             -- Race data --
             INSERT INTO races (name, description, is_standard_race, is_subrace, parent_race_id, created_at, updated_at) VALUES 
@@ -749,6 +714,13 @@ pub fn get_migration() -> Migration {
                 CREATE INDEX IF NOT EXISTS idx_area_types_level ON area_types (level);
 
 
+            -- tags:
+                CREATE INDEX IF NOT EXISTS idx_tags_tag_name ON tags(tag_name);
+
+            -- tag_relationships:
+                CREATE INDEX IF NOT EXISTS idx_tag_relationships_tag_id ON tag_relationships(tag_id);
+                CREATE INDEX IF NOT EXISTS idx_tag_relationships_entity_id ON tag_relationships(entity_id);
+                CREATE INDEX IF NOT EXISTS idx_tag_relationships_entity_type ON tag_relationships(entity_type);
 
             -- Triggers --
             
