@@ -1,3 +1,6 @@
+/* Import centralized dialog styles */
+@import './dialogs.css';
+
 .app-header {
     width: 100%;
 }
@@ -319,7 +322,8 @@ dialog::backdrop {
 .location-autocomplete-container,
 .calendar-autocomplete-container,
 .house-rules-autocomplete-container,
-.world-autocomplete-container {
+.world-autocomplete-container,
+.map-autocomplete-container {
     display: flex;
     position: relative;
     gap: var(--spacing-sm);
@@ -429,6 +433,139 @@ h2,
 p {
     user-select: none;
 }
+
+/* ---------------------------------------------------- */
+
+.create_object_dialog {
+    position: fixed;
+    top: calc(10% - 21px);
+    left: calc(10% - 21px);
+    width: 80%;
+    height: 80%;
+    padding: 20px;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    box-shadow: 2px 2px 2px 0 rgba(233, 206, 206, 0.2);
+    margin: 0;
+    background-color: var(--color-bg-primary);
+
+    overflow-y: hidden;
+
+    z-index: 1000;
+}
+
+.create_object_dialog .form-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    height: 65vh;
+}
+
+.create_object_dialog h2 {
+    margin: 5px auto 20px auto;
+    color: var(--color-text-primary);
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.create_object_dialog .button-container {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    flex-direction: row;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.create_object_dialog .create-object-button {
+    width: 40%;
+    display: block;
+    background-color: #444;
+    color: var(--color-bg-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    transition: var(--transition-default) !important;
+}
+
+.create_object_dialog .create-object-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-bg-primary);
+    transition: var(--transition-default) !important;
+}
+
+.create_object_dialog .dialog-input {
+    width: 68%;
+    margin-bottom: 10px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-primary);
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+.create_object_dialog .formline-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    justify-content: stretch;
+    z-index: 1000;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.create_object_dialog .formline-container label {
+    width: 16%;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.create_object_dialog .formline-container input {
+    width: 80%;
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+.create_object_dialog  textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.create_object_dialog .formline-container input[type="checkbox"] {
+    width: 32px;
+    height: 32px;
+    margin-left: 16% !important;
+    transform: translateX(-50%) !important;
+    
+}
+
+.create_object_dialog .location-type-dropdown {
+    width: 72%;
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+#newItem_locationName {
+    font-size: 1.3em;;
+}
+
+.create_object_dialog .array-container {
+    width: 72%;
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -19,6 +19,7 @@
     "natural": "^8.1.0",
     "remixicon": "^4.6.0",
     "sqlite3": "^5.1.7",
+    "svelte-portal": "^2.2.1",
     "tracery-grammar": "^2.8.4"
   },
   "devDependencies": {

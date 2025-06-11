@@ -2,17 +2,8 @@
     import { createEventDispatcher } from 'svelte';
     import { fade, fly } from 'svelte/transition';
     import { clickOutside } from '$lib/actions/clickOutside';
+    import { type DropdownOption, type DropdownGroup } from '$lib/types';
     import '$lib/styles/customDropdown.css';
-
-    type DropdownOption = {
-        value: string | number;
-        label: string;
-    };
-
-    type DropdownGroup = {
-        label: string;
-        options: DropdownOption[];
-    };
 
     export let options: (DropdownOption | DropdownGroup)[] = [];
     export let value: string | number = '';
@@ -29,6 +20,8 @@
     let isOpen = false;
     let selectedLabel = '';
     let dropdownRef: HTMLElement;
+    let searchText = '';
+    let filteredOptions: (DropdownOption | DropdownGroup)[] = [];
 
     const dispatch = createEventDispatcher<{
         change: { value: string | number; label: string };
@@ -53,16 +46,53 @@
         selectedLabel = selected ? selected.label : '';
     }
 
+    function filterOptions(search: string): (DropdownOption | DropdownGroup)[] {
+        if (!search) return options;
+        
+        return options.map(item => {
+            if ('options' in item) {
+                // It's a group
+                const filteredGroupOptions = item.options.filter(opt => 
+                    opt.label.toLowerCase().includes(search.toLowerCase())
+                );
+                if (filteredGroupOptions.length > 0) {
+                    return {
+                        label: item.label,
+                        options: filteredGroupOptions
+                    };
+                }
+                return null;
+            } else {
+                // It's a single option
+                if (item.label.toLowerCase().includes(search.toLowerCase())) {
+                    return item;
+                }
+                return null;
+            }
+        }).filter(Boolean) as (DropdownOption | DropdownGroup)[];
+    }
+
+    $: filteredOptions = filterOptions(searchText);
+
+    function handleSearchInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        searchText = input.value;
+    }
+
     function handleSelect(option: DropdownOption) {
         value = option.value;
         selectedLabel = option.label;
         isOpen = false;
+        searchText = '';
         dispatch('change', option);
     }
 
     function toggleDropdown() {
         if (!disabled) {
             isOpen = !isOpen;
+            if (!isOpen) {
+                searchText = '';
+            }
         }
     }
 
@@ -145,7 +175,7 @@
         }
     }
 
-    export { type DropdownOption, type DropdownGroup }; 
+    // Types are now exported from $lib/types 
 </script>
 
 <div 
@@ -175,7 +205,18 @@
             role="listbox"
             transition:fly={{ y: -10, duration: 200 }}
         >
-            {#each options as item}
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    style="display: block;"
+                    class="search-input" 
+                    placeholder="Search..." 
+                    bind:value={searchText}
+                    on:input={handleSearchInput}
+                    on:click|stopPropagation
+                />
+            </div>
+            {#each filteredOptions as item}
                 {#if 'options' in item}
                     <div class="dropdown-group">
                         <div class="group-label">{item.label}</div>
@@ -216,3 +257,24 @@
         {disabled}
     />
 </div>
+
+<style>
+    .search-container {
+        padding: 8px;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+    }
+</style>

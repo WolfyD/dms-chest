@@ -1,9 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-
-export type CampaignName = {
-    name: string;
-    id: number;
-}
+import { type CampaignName } from '$lib/types';
 
 export async function getCampaignNames() : Promise<CampaignName[]> {
     try {

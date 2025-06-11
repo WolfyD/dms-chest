@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PortalHost from 'svelte-portal';
   import { onMount, onDestroy } from 'svelte';
   // This layout will be applied to all pages
   import '$lib/styles/global.css';

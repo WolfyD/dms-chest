@@ -259,4 +259,17 @@ type Level = {
       throw error;
     }
   }
+
+  export async function getLocationTypes(): Promise<{ name: string, id: number }[]> {
+    try {
+      const results = await invoke<Array<{ name: string, id: number }>>('query_database_no_params', {
+        query: "SELECT name, id FROM area_types WHERE deleted_at IS NULL",
+      });
+
+      return results.map(row => ({ name: row.name, id: row.id }));
+    } catch (error) {
+      console.error('Failed to query database:', error);
+      throw error;
+    }
+  }
   

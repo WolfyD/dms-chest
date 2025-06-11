@@ -1,17 +1,21 @@
 <script lang="ts">
+    import Portal from 'svelte-portal';
     import { activeTab, categories } from '$lib/stores/tabStore';
     import AutocompleteInput from '$lib/components/AutocompleteInput.svelte';
-    import { getCampaignNames, createCampaign, type CampaignName } from '$lib/utils/campaigns';
+    import { getCampaignNames, createCampaign } from '$lib/utils/campaigns';
     import { onMount } from 'svelte';
-    import  CustomDropdown from '$lib/components/CustomDropdown.svelte'; 
-    import DropdownGroup from  '$lib/components/CustomDropdown.svelte';
-    import { getLocations, checkLocationCount, getFirstNLocations } from '$lib/utils/region';
+    import CustomDropdown from '$lib/components/CustomDropdown.svelte'; 
+    import { type DropdownOption, type DropdownGroup, type CampaignName, type SuggestionItem } from '$lib/types';
+    import { addLocation, addWorld, addCalendar, addHouseRules, addMap } from '$lib/utils/dialogs';
+    import { getLocations, checkLocationCount, getFirstNLocations, getLocationTypes } from '$lib/utils/region';
     import { getCalendars, checkCalendarCount, getCalendarByWorldId } from '$lib/utils/calendars';
     import { getHouseRules, checkHouseRuleCount } from '$lib/utils/houseRules';
     import { getWorlds, checkWorldCount } from '$lib/utils/world';
+    import { getMaps, checkMapCount } from '$lib/utils/maps';
     import { invoke } from '@tauri-apps/api/core';
     import '$lib/styles/tabs.css';
     import { json } from '@sveltejs/kit';
+    import { clickOutside } from '$lib/actions/clickOutside';
 
     function handleTabClick(tabId: string) {
         activeTab.set(tabId);
@@ -25,24 +29,58 @@
     let calendarObject: { id: number, name: string } = { id: 0, name: '' };
     let houseRulesObject: { id: number, name: string } = { id: 0, name: '' };
     let worldObject: { id: number, name: string } = { id: 0, name: '' };
-    let campaignTypeOptions = new Array<DropdownGroup>();
+    let campaignTypeOptions: DropdownGroup[] = [];
+    let locationTypeOptions: DropdownOption[] = [];
     let campaignType: string = 'other';
     let themes: string[] = [];
     let tones: string[] = [];
     let winConditions: string[] = [];
-    let worldSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let worldSuggestions: SuggestionItem[] = [];
     let showWorldSuggestions = false;
-    let locationSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let locationSuggestions: SuggestionItem[] = [];
     let showLocationSuggestions = false;
-    let calendarSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let calendarSuggestions: SuggestionItem[] = [];
     let showCalendarSuggestions = false;
-    let houseRuleSuggestions: { id: number | string, label: string, data: any }[] = [];
+    let houseRuleSuggestions: SuggestionItem[] = [];
     let showHouseRuleSuggestions = false;
+    let createLocation_LocationIsRoot = false;
+
+    // ---------- Object Creation Dialog ----------
+    let objectType: string = 'Location';
+    let locationType: number = 0;
+    let newLocation_NotableLandmarks: string[] = [];
+    let newLocation_MajorEvents: string[] = [];
+    let createLocation_HasMap: boolean = false;
+    let mapObject: { id: number, name: string } = { id: 0, name: '' };
+    let mapSuggestions: SuggestionItem[] = [];
+    let showMapSuggestions = false;
 
     onMount(() => {
         getCampaignsFromDatabase();
         setCampaignTypeOptions();
+        getLocationObjectTypes();
     });
+
+    function handleCreateObjectSubmit(event: Event, array: string[], inputId: string) {
+        event.preventDefault();
+        const formData = new FormData(event.target as HTMLFormElement);
+        const objectName = formData.get('objectName') as string;
+        const objectDescription = formData.get('objectDescription') as string;
+        
+    }
+
+    function handleGeneralInput(event: KeyboardEvent, value: string, array: string[]): string[] {
+        if(event.key === 'Enter') {
+            event.preventDefault();
+            const input = event.target as HTMLInputElement;
+            if(value.trim() !== '') { 
+                array = addToArray(array, value);
+                input.value = '';
+                console.log(array);
+            }
+        }
+        return array;
+    }
 
     /**
      * Handles the keydown event
@@ -124,7 +162,7 @@
      */
     function handleCreateNewCampaign() {
         console.log('Create new campaign clicked');
-        const dialog = document.getElementById('new-campaign-dialog');
+        const dialog = document.getElementById('new-campaign-dialog') as HTMLDialogElement;
         if (dialog) {
             dialog.showModal();
         }
@@ -223,7 +261,7 @@
      * Resets the form
      */
     function closeDialog() {
-        const dialog = document.getElementById('new-campaign-dialog');
+        const dialog = document.getElementById('new-campaign-dialog') as HTMLDialogElement;
         if (dialog) {
             dialog.getElementsByTagName('form')[0].reset();
             locationObject = { id: 0, name: '' };
@@ -260,51 +298,6 @@
      */
     function removeFromArray(array: string[], value: string) {
         return array.filter(item => item !== value);
-    }
-
-    /**
-     * Handles the input of a theme
-     * @param event
-     */
-    function handleThemeInput(event: KeyboardEvent) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const input = event.target as HTMLInputElement;
-            if(input.value.trim() !== '') { 
-                themes = [...themes, input.value];
-            }
-            input.value = '';
-        }
-    }
-
-    /**
-     * Handles the input of a tone
-     * @param event
-     */
-    function handleToneInput(event: KeyboardEvent) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const input = event.target as HTMLInputElement;
-            if(input.value.trim() !== '') {
-                tones = [...tones, input.value];
-            }
-            input.value = '';
-        }
-    }
-
-    /**
-     * Handles the input of a win condition
-     * @param event
-     */
-    function handleWinConditionInput(event: KeyboardEvent) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const input = event.target as HTMLInputElement;
-            if(input.value.trim() !== '') {
-                winConditions = [...winConditions, input.value];
-            }
-            input.value = '';
-        }
     }
 
     /**
@@ -519,6 +512,41 @@
             showHouseRuleSuggestions = true;
         }
     }
+
+    /**
+     * Gets the location object types
+     */
+    async function getLocationObjectTypes(): Promise<DropdownOption[]> {
+        await getLocationTypes().then(types => {
+            locationTypeOptions = types.map(type => ({
+                value: type.id,
+                label: type.name
+            }));
+        });
+        return locationTypeOptions;
+    }
+
+    async function handleLocationTypeChange(event: CustomEvent<{ value: string | number, label: string }>) {
+        locationType = Number(event.detail.value);
+        console.log("locationType", locationType);
+    }
+
+    async function loadMapSuggestions() {
+        if(mapObject.id == 0 || mapObject.id == null || mapObject.id == undefined) {
+            const maps = await getMaps("");
+            mapSuggestions = maps.map(map => ({
+                id: map.id,
+                label: map.name,
+                data: map   
+            }));
+            showMapSuggestions = true;
+        }
+    }
+
+    async function handleMapSelect(item: { id: number | string, label: string, data: any }) {
+        mapObject = { id: Number(item.id), name: item.label };
+        console.log("mapObject", mapObject);
+    }
 </script>
 
 <div class="tabs-container">
@@ -614,7 +642,7 @@
                 <label for="themes">Themes</label>
                 <div class="array-container theme-container">
                     <div class="array-input">
-                        <input class="add-array-input add-theme-input" type="text" id="new-campaign-themes" placeholder="Add theme" on:keydown={handleThemeInput} />
+                        <input class="add-array-input add-theme-input" type="text" id="new-campaign-themes" placeholder="Add theme" on:keydown={(e) => { themes = handleGeneralInput(e, (document.getElementById('new-campaign-themes') as HTMLInputElement)?.value || '', themes) }} />
                         <button class="array-input-button add-theme-button" type="button" on:click={() => { themes = addToArray(themes, (document.getElementById('new-campaign-themes') as HTMLInputElement)?.value || ''); (document.getElementById('new-campaign-themes') as HTMLInputElement).value = '' }}>Add</button>
                     </div>
                     <div class="array-list theme-list">
@@ -634,7 +662,7 @@
                 <label for="tones">Tones</label>
                 <div class="array-container tone-container">
                     <div class="array-input">
-                        <input class="add-array-input add-tone-input" type="text" id="new-campaign-tones" placeholder="Add tone" on:keydown={handleToneInput} />
+                        <input class="add-array-input add-tone-input" type="text" id="new-campaign-tones" placeholder="Add tone" on:keydown={(e) => { tones = handleGeneralInput(e, (document.getElementById('new-campaign-tones') as HTMLInputElement)?.value || '', tones) }} />
                         <button class="array-input-button add-tone-button" type="button" on:click={() => { tones = addToArray(tones, (document.getElementById('new-campaign-tones') as HTMLInputElement)?.value || ''); (document.getElementById('new-campaign-tones') as HTMLInputElement).value = '' }}>Add</button>
                     </div>
                     <div class="array-list tone-list">
@@ -678,7 +706,7 @@
                 <label for="win-conditions">Win Conditions</label>
                 <div class="array-container win-condition-container">
                     <div class="array-input">
-                        <input class="add-array-input add-win-condition-input" type="text" id="new-campaign-win-conditions" placeholder="Add win condition" on:keydown={handleWinConditionInput} />
+                        <input class="add-array-input add-win-condition-input" type="text" id="new-campaign-win-conditions" placeholder="Add win condition" on:keydown={(e) => { winConditions = handleGeneralInput(e, (document.getElementById('new-campaign-win-conditions') as HTMLInputElement)?.value || '', winConditions) }} />
                         <button class="array-input-button add-win-condition-button" type="button" on:click={() => { winConditions = addToArray(winConditions, (document.getElementById('new-campaign-win-conditions') as HTMLInputElement)?.value || ''); (document.getElementById('new-campaign-win-conditions') as HTMLInputElement).value = '' }}>Add</button>
                     </div>
 
@@ -779,6 +807,255 @@
         <button class="create-campaign-button button-short button-right invisible" type="submit">Create</button>
     </form>
 </dialog>
+
+<Portal target="body">
+    <div class="create_object_dialog">
+        <h2>Create {objectType}</h2>
+        <form on:submit|preventDefault={handleCreateObjectSubmit}>
+            <div class="form-container">
+                <!--+ Location -->
+                {#if objectType === 'Location'}
+                    <input required class="dialog-input required" id="newItem_locationName" name="locationName" autocomplete="off" autofocus={true} type="text" title="Location Name" placeholder="Location Name" />
+                    <textarea class="dialog-input" name="locationDescription" autocomplete="off" title="Location Description" placeholder="Location Description"></textarea>
+
+                    <!--+ World -->
+                    <div class="formline-container">
+                        <AutocompleteInput
+                            class_name="world-autocomplete-container"
+                            searchFn={getWorlds}
+                            on:click={async () => { 
+                                const count = await countReturnedObject(checkWorldCount());
+                                if(count < 4) { 
+                                    await loadWorldSuggestions();
+                                }
+                            }}
+                            bind:value={worldObject}
+                            placeholder="Enter world name..."
+                            onSelect={handleWorldSelect}
+                            icon="earth-line"
+                            externalSuggestions={worldSuggestions}
+                            forceShowSuggestions={showWorldSuggestions}
+                        />
+                    </div>
+
+                    <!--+ IsRoot -->
+                    <div class="formline-container" title="Does the location have no parent?">
+                        <input type="checkbox" name="isRoot" title="Is Root" id="isRoot" bind:checked={createLocation_LocationIsRoot} />
+                        <label for="isRoot">Is Root</label>
+                    </div>
+
+                    <!--+ Parent -->
+                    {#if !createLocation_LocationIsRoot}
+                    <div class="formline-container">
+                        <AutocompleteInput
+                            class_name="world-autocomplete-container"
+                            searchFn={getLocations}
+                            on:click={async () => { 
+                                const count = await countReturnedObject(checkLocationCount());
+                                await loadLocationSuggestions();
+                            }}
+                            bind:value={locationObject}
+                            placeholder="Enter location name..."
+                            onSelect={handleLocationSelect}
+                            icon="globe-line"
+                            externalSuggestions={locationSuggestions}
+                            forceShowSuggestions={showLocationSuggestions}
+                        />
+                    </div>
+                    {/if}
+
+                    <!--+ Type -->
+                    <div class="formline-container location-type-dropdown">
+                        <CustomDropdown
+                            options={locationTypeOptions}
+                            value={locationType}
+                            placeholder="Select a location type"
+                            on:change={handleLocationTypeChange}    
+                        />
+                    </div>
+
+                    <!--+ Population -->
+                    <input class="dialog-input" type="number" name="population" title="Population" min="0" max="999999999999" value="0" placeholder="Population" />
+
+                    <!--+ Known for -->
+                    <input class="dialog-input" type="text" name="knownFor" title="Known For" placeholder="Known For" />
+
+                    <!--+ Terrain -->
+                    <input class="dialog-input" type="text" name="terrain" title="Terrain" placeholder="Terrain" />
+
+                    <!--+ Climate -->
+                    <input class="dialog-input" type="text" name="climate" title="Climate" placeholder="Climate" />
+
+                    <!--+ Danger level -->
+                    <input class="dialog-input" type="number" name="dangerLevel" title="Danger Level" min="1" max="5" value="3" placeholder="Danger Level" />
+
+                    <!--+ Notable landmarks -->
+                    <div class="array-container landmark-container">
+                        <div class="array-input">
+                            <input class="add-array-input add-landmark-input" type="text" id="newItem_notableLandmarks" placeholder="Add landmark" on:keydown={(e) => { newLocation_NotableLandmarks = handleGeneralInput(e, (document.getElementById('newItem_notableLandmarks') as HTMLInputElement)?.value || '', newLocation_NotableLandmarks) }} />
+                            <button class="array-input-button add-landmark-button" type="button" on:click={() => { newLocation_NotableLandmarks = addToArray(newLocation_NotableLandmarks, (document.getElementById('newItem_notableLandmarks') as HTMLInputElement)?.value || ''); (document.getElementById('newItem_notableLandmarks') as HTMLInputElement).value = '' }}>Add</button>
+                        </div>
+                        <div class="array-list theme-list">
+                            {#each newLocation_NotableLandmarks as landmark}
+                                <div class="array-item theme-item">
+                                    {landmark}
+                                    <button class="array-remove-button remove-theme-button" type="button" on:click={() => newLocation_NotableLandmarks = removeFromArray(newLocation_NotableLandmarks, landmark)}>×</button>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+
+                    <!--+ History -->
+                    <textarea class="dialog-input" name="history" autocomplete="off" title="History" placeholder="History"></textarea>
+
+                    <!--+ Major events -->
+                    <div class="array-container major-events-container">
+                        <div class="array-input">
+                            <input class="add-array-input add-major-event-input" type="text" id="newItem_majorEvents" placeholder="Add major event" on:keydown={(e) => { newLocation_MajorEvents = handleGeneralInput(e, (document.getElementById('newItem_majorEvents') as HTMLInputElement)?.value || '', newLocation_MajorEvents, 'newItem_majorEvents') }} />
+                            <button class="array-input-button add-major-event-button" type="button" on:click={() => { newLocation_MajorEvents = addToArray(newLocation_MajorEvents, (document.getElementById('newItem_majorEvents') as HTMLInputElement)?.value || ''); (document.getElementById('newItem_majorEvents') as HTMLInputElement).value = '' }}>Add</button>
+                        </div>
+                        <div class="array-list theme-list">
+                            {#each newLocation_MajorEvents as majorEvent}
+                                <div class="array-item theme-item">
+                                    {majorEvent}
+                                    <button class="array-remove-button remove-theme-button" type="button" on:click={() => newLocation_MajorEvents = removeFromArray(newLocation_MajorEvents, majorEvent)}>×</button>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+
+                    <!--+ Notes -->
+                    <textarea class="dialog-input" name="notes" autocomplete="off" title="Notes" placeholder="Notes"></textarea>
+
+                    <!--+ Has map -->
+                    <div class="formline-container">
+                        <input type="checkbox" name="hasMap" title="Has Map" id="hasMap" bind:checked={createLocation_HasMap} />
+                        <label for="hasMap">Has Map</label>
+                    </div>
+
+                    {#if createLocation_HasMap}
+                        <!--+ Map id -->
+                        <div class="formline-container">
+                            <AutocompleteInput
+                                class_name="map-autocomplete-container"
+                                searchFn={getMaps}
+                                on:click={async () => { 
+                                    const count = await countReturnedObject(checkMapCount());
+                                    if(count < 4) { 
+                                        await loadMapSuggestions();
+                                    }
+                                }}
+                                bind:value={mapObject}
+                                placeholder="Enter map name..."
+                                onSelect={handleMapSelect}
+                                icon="map-line"
+                                externalSuggestions={mapSuggestions}
+                                forceShowSuggestions={showMapSuggestions}
+                            />
+                        </div>
+
+                        <!--+ Map image -->
+                        <input class="dialog-input" type="text" name="mapImage" title="Map Image" placeholder="Map Image" />
+
+                        <!--+ Map location-->
+                        <input class="dialog-input" type="text" name="mapLocation" title="Map Location" placeholder="Map Location" />
+                    {/if}
+
+                    
+                {/if}
+
+                <!--+ World -->
+                {#if objectType === 'World'}
+                    <input required class="dialog-input required" name="worldName" autocomplete="off" autofocus={true} type="text" title="World Name" placeholder="World Name" />
+                    <textarea class="dialog-input" name="worldDescription" autocomplete="off" title="World Description" placeholder="World Description"></textarea>
+
+                    <!--+ Genre -->
+
+                    <!--+ Tone -->
+
+                    <!--+ Tech level -->
+
+                    <!--+ Magic level -->
+
+                    <!--+ Dominant species -->
+
+                    <!--+ Other species -->
+
+                    <!--+ Religions -->
+
+                    <!--+ Pantheon -->
+
+                    <!--+ Notable landmarks -->
+
+                    <!--+ History -->
+
+                    <!--+ Planar structure -->
+
+                    <!--+ Calendar -->
+
+                    <!--+ Established material -->
+
+                {/if}
+
+                <!--+ Calendar -->
+                {#if objectType === 'Calendar'}
+                    <input required class="dialog-input required" name="calendarName" autocomplete="off" autofocus={true} type="text" title="Calendar Name" placeholder="Calendar Name" />
+                    <textarea class="dialog-input" name="calendarDescription" autocomplete="off" title="Calendar Description" placeholder="Calendar Description"></textarea>
+
+                    <!--+ Days in year -->
+
+                    <!--+ Months in year -->
+
+                    <!--+ Days in week -->
+
+                    <!--+ Weeks in month -->
+
+                    <!--+ Months -->
+
+                    <!--+ Days of week -->
+
+                    <!--+ Hours in day -->
+
+                    <!--+ Minutes in hour -->
+
+                    <!--+ Seconds in minute -->
+
+                    <!--+ Pre epoch prefix -->
+
+                    <!--+ Post epoch prefix -->
+
+                    <!--+ Epoch term -->
+
+                    <!--+ Important Holidays -->
+
+                    <!--+ Notable events -->
+
+                    <!--+ Major astronomical events -->
+
+                    <!--+ Major astrological events -->
+
+                    <!--+ Major historical events -->
+
+                    <!--+ Moon phases -->
+
+                    <!--+ Moon phases in month -->
+
+                    <!--+ Moon phase at 0 -->
+
+                {/if}
+
+                <!--+ Buttons -->
+
+                <div class="button-container">
+                    <button class="create-object-button" type="button" on:click={() => createObject(event, objectType)}>Create</button>
+                </div>
+            </div>
+        </form>
+
+
+        
+    </div>
+</Portal>
 
 <style>
     .campaign-dropdown {
