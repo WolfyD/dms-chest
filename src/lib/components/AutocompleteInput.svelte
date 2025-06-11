@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createDebouncedAutocomplete, type SuggestionItem } from '$lib/utils/debouncedAutocomplete';
     import { onMount, createEventDispatcher } from 'svelte';
+    import { clickOutside } from '$lib/actions/clickOutside';
 
     // Props
     export let searchFn: (text: string) => Promise<any[]>;
@@ -103,6 +104,12 @@
         displayValue = suggestion.label;
     }
 
+    // Handle click outside to close suggestions
+    function handleClickOutside() {
+        showSuggestions = false;
+        selectedIndex = -1;
+    }
+
     // Focus the input when the component mounts
     onMount(() => {
         inputElement?.focus();
@@ -117,7 +124,7 @@
     });
 </script>
 
-<div class="autocomplete-container">
+<div class="autocomplete-container" use:clickOutside={handleClickOutside}>
     <div class="input-wrapper">
         <input 
             type="text" 

@@ -46,10 +46,14 @@
         selectedLabel = selected ? selected.label : '';
     }
 
-    function filterOptions(search: string): (DropdownOption | DropdownGroup)[] {
-        if (!search) return options;
+    function filterOptions(search: string, availableOptions: (DropdownOption | DropdownGroup)[]): (DropdownOption | DropdownGroup)[] {
+        // If no options are available yet, return empty array
+        if (!availableOptions || availableOptions.length === 0) return [];
         
-        return options.map(item => {
+        // If no search text, return all options
+        if (!search || search.trim().length === 0) return availableOptions;
+        
+        return availableOptions.map(item => {
             if ('options' in item) {
                 // It's a group
                 const filteredGroupOptions = item.options.filter(opt => 
@@ -72,7 +76,8 @@
         }).filter(Boolean) as (DropdownOption | DropdownGroup)[];
     }
 
-    $: filteredOptions = filterOptions(searchText);
+    // Make the reactive statement depend on both searchText AND options
+    $: filteredOptions = filterOptions(searchText, options);
 
     function handleSearchInput(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -262,6 +267,7 @@
     .search-container {
         padding: 8px;
         border-bottom: 1px solid var(--color-border);
+        display: flex;
     }
 
     .search-input {

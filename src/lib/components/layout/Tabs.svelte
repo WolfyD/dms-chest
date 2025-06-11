@@ -12,8 +12,8 @@
     import { getHouseRules, checkHouseRuleCount } from '$lib/utils/houseRules';
     import { getWorlds, checkWorldCount } from '$lib/utils/world';
     import { getMaps, checkMapCount } from '$lib/utils/maps';
+
     import { invoke } from '@tauri-apps/api/core';
-    // Styles now imported via unified CSS system
     import { json } from '@sveltejs/kit';
     import { clickOutside } from '$lib/actions/clickOutside';
 
@@ -611,7 +611,6 @@
                     title="Campaign Type"
                 />
             </div>
-            <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
 
             <input required class="dialog-input required" type="number" name="partySize" min="1" max="20" title="Party Size" placeholder="Party Size" />
             <input required class="dialog-input required" type="number" name="partyLevel" min="1" max="20" title="Party Level" placeholder="Party Level" />
