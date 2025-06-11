@@ -94,7 +94,7 @@ openTool('your-tool-name');
 
 ### 5. Styling Guidelines
 1. Use variables from `src/lib/styles/variables.css`
-2. Common tool styles are in `src/lib/styles/tool-grid.css`
+2. Common tool styles are in `src/lib/styles/components.css`
 3. Only create tool-specific styles when necessary
 4. Follow the styling hierarchy:
    - Common styles first

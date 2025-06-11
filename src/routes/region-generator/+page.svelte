@@ -2,9 +2,7 @@
     import { toolData } from '$lib/stores/toolData';
     import { onMount } from 'svelte';
     import { invoke } from '@tauri-apps/api/core';
-    import '$lib/styles/tool-grid.css';
-    import '$lib/styles/components.css';
-    import '$lib/styles/tool-box-item.css';
+    // Styles now imported via unified CSS system
     import { getLocationParents, getLocationChildren, getLocations } from '$lib/utils/region';
     import AutocompleteInput from '$lib/components/AutocompleteInput.svelte';
 

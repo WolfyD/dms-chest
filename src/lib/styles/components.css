@@ -110,3 +110,362 @@
 .secondary-button:hover {
     opacity: 0.9;
 } 
+
+/* Tool Grid Components */
+.tool-grid {
+    padding: var(--spacing-xl);
+}
+
+.tool-grid h2 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-primary);
+}
+
+.tools-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.tool-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: var(--transition-default);
+}
+
+.tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--color-shadow);
+    border-color: var(--color-primary);
+}
+
+.tool-card h3 {
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.tool-card p {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* Tab Content */
+.tab-content {
+    padding: var(--spacing-xl);
+    color: var(--color-text-primary);
+}
+
+.tab-content h2 {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Custom Dropdown Component */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+    user-select: none;
+    isolation: isolate;
+}
+
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-default);
+}
+
+.dropdown-header:hover:not(.disabled) {
+    border-color: var(--color-primary);
+}
+
+.selected-value {
+    color: var(--color-text-primary);
+}
+
+.dropdown-arrow {
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.25rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    isolation: isolate;
+}
+
+.dropdown-group {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dropdown-group:last-child {
+    border-bottom: none;
+}
+
+.group-label {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-tertiary);
+    font-weight: 500;
+}
+
+.dropdown-item {
+    display: block;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    color: var(--color-text-primary);
+    transition: var(--transition-default);
+}
+
+.dropdown-item:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.dropdown-item.selected {
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+}
+
+.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.disabled .dropdown-header {
+    cursor: not-allowed;
+}
+
+/* Custom Dropdown Scrollbar */
+.dropdown-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dropdown-list::-webkit-scrollbar-track {
+    background: var(--color-bg-tertiary);
+    border-radius: 4px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb {
+    background: var(--color-text-tertiary);
+    border-radius: 4px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary);
+} 
+
+/* Tool Box Item Components */
+.form-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: var(--transition-default);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: var(--radius-sm);
+    width: 85%;
+}
+
+.generator-button {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: var(--radius-sm);
+    width: 10%;
+    margin-left: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: var(--transition-default);
+}
+
+.generator-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.description-textarea {
+    width: 85%;
+    max-width: 85%;
+    height: 100px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.world-description-generator {
+    position: relative;
+    top: -10px;
+}
+
+.world-generator-button {
+    width: 100%;
+    position: relative;
+    left: -10px;
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-default);
+}
+
+.world-generator-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.location-list {
+    margin-top: var(--spacing-sm);
+}
+
+.location-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+} 
+
+/* Additional Tool Styles */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tool-card:hover::before {
+    opacity: 1;
+}
+
+.tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.tool-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.tool-description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.tool-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: auto;
+}
+
+.tool-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--color-primary);
+    color: var(--color-bg-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-default);
+    flex: 1;
+    text-align: center;
+}
+
+.tool-button:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+}
+
+.tool-button.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.tool-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tool Responsive Design */
+@media (max-width: 768px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    .tool-card {
+        padding: var(--spacing-md);
+    }
+
+    .tool-title {
+        font-size: 1.1rem;
+    }
+
+    .tool-description {
+        font-size: 0.85rem;
+    }
+
+    .tool-actions {
+        flex-direction: column;
+    }
+
+    .tool-button {
+        width: 100%;
+    }
+} 

@@ -222,6 +222,10 @@ p {
     user-select: none;
 }
 
+.hidden {
+    display: block;
+}
+
 /* Portal Dialog Styles */
 .create_object_dialog {
     position: fixed;

@@ -1,21 +1,18 @@
 <script lang="ts">
     import Tabs from './Tabs.svelte';
     import ToolGrid from './ToolGrid.svelte';
-    import '$lib/styles/layout.css';
+    // Import unified CSS
+    import '$lib/styles/index.css';
 </script>
 
 <div class="app-layout">
-    <header class="app-header">
+    <!-- Left Sidebar with Tabs -->
+    <aside class="app-sidebar">
         <Tabs />
-    </header>
+    </aside>
     
-    <main class="app-content">
-        <aside class="sidebar">
-            <!-- Sidebar content (e.g., filters, quick actions) -->
-        </aside>
-        
-        <section class="main-content">
-            <ToolGrid />
-        </section>
+    <!-- Main Content Area -->
+    <main class="app-main">
+        <ToolGrid />
     </main>
 </div> 

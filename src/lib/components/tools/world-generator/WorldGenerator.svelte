@@ -1,8 +1,6 @@
 <script lang="ts">
     import { invoke } from '@tauri-apps/api/core';
-    import '$lib/styles/tool-grid.css';
-    import '$lib/styles/components.css';
-    import '$lib/styles/tool-box-item.css';
+    // Styles now imported via unified CSS system
     import { generateWorldName, getWorldDescription } from '$lib/utils/tracery';
     import { makeSlightlyDifferent } from '$lib/utils/compromise';
     import { randomizeValues, getRandomPlane, getRandomSpecies } from '$lib/utils/world';

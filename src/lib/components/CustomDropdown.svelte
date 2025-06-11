@@ -3,7 +3,7 @@
     import { fade, fly } from 'svelte/transition';
     import { clickOutside } from '$lib/actions/clickOutside';
     import { type DropdownOption, type DropdownGroup } from '$lib/types';
-    import '$lib/styles/customDropdown.css';
+    // Styles now imported via unified CSS system
 
     export let options: (DropdownOption | DropdownGroup)[] = [];
     export let value: string | number = '';

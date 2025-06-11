@@ -13,7 +13,7 @@
     import { getWorlds, checkWorldCount } from '$lib/utils/world';
     import { getMaps, checkMapCount } from '$lib/utils/maps';
     import { invoke } from '@tauri-apps/api/core';
-    import '$lib/styles/tabs.css';
+    // Styles now imported via unified CSS system
     import { json } from '@sveltejs/kit';
     import { clickOutside } from '$lib/actions/clickOutside';
 
@@ -61,12 +61,13 @@
         getLocationObjectTypes();
     });
 
-    function handleCreateObjectSubmit(event: Event, array: string[], inputId: string) {
+    function handleCreateObjectSubmit(event: SubmitEvent) {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
         const objectName = formData.get('objectName') as string;
         const objectDescription = formData.get('objectDescription') as string;
         
+        console.log('Creating object:', objectType, objectName, objectDescription);
     }
 
     function handleGeneralInput(event: KeyboardEvent, value: string, array: string[]): string[] {
@@ -332,9 +333,15 @@
         let currentFormPage = document.getElementById('new-campaign-form-page' + formPage);
         let currentFormElements = Array.from(currentFormPage?.querySelectorAll('input, textarea, select, AutocompleteInput, CustomDropdown') || []);
 
-        let currentUnfilledElements = Array.from(currentFormElements).filter(element => element.value === '' || element.value === 0 || element.value === null);
+        let currentUnfilledElements = Array.from(currentFormElements).filter(element => {
+            const htmlElement = element as HTMLInputElement;
+            return htmlElement.value === '' || htmlElement.value === '0' || htmlElement.value === null;
+        });
         let currentUnfilledDropdowns = Array.from(currentFormElements).filter(element => element.classList.contains('custom-dropdown-input'));
-        currentUnfilledDropdowns = currentUnfilledDropdowns.filter(element => element.value == '' || element.value == 0 || element.value == null || element.textContent?.startsWith('Select'));
+        currentUnfilledDropdowns = currentUnfilledDropdowns.filter(element => {
+            const htmlElement = element as HTMLInputElement;
+            return htmlElement.value == '' || htmlElement.value == '0' || htmlElement.value == null || element.textContent?.startsWith('Select');
+        });
         let newCurrentUnfilledElements: Element[] = [...currentUnfilledElements, ...currentUnfilledDropdowns];
 
         newCurrentUnfilledElements = newCurrentUnfilledElements.filter(element => element.classList.contains("required"));
@@ -809,7 +816,7 @@
 </dialog>
 
 <Portal target="body">
-    <div class="create_object_dialog">
+    <div class="create_object_dialog hidden">
         <h2>Create {objectType}</h2>
         <form on:submit|preventDefault={handleCreateObjectSubmit}>
             <div class="form-container">
@@ -911,7 +918,7 @@
                     <!--+ Major events -->
                     <div class="array-container major-events-container">
                         <div class="array-input">
-                            <input class="add-array-input add-major-event-input" type="text" id="newItem_majorEvents" placeholder="Add major event" on:keydown={(e) => { newLocation_MajorEvents = handleGeneralInput(e, (document.getElementById('newItem_majorEvents') as HTMLInputElement)?.value || '', newLocation_MajorEvents, 'newItem_majorEvents') }} />
+                            <input class="add-array-input add-major-event-input" type="text" id="newItem_majorEvents" placeholder="Add major event" on:keydown={(e) => { newLocation_MajorEvents = handleGeneralInput(e, (document.getElementById('newItem_majorEvents') as HTMLInputElement)?.value || '', newLocation_MajorEvents) }} />
                             <button class="array-input-button add-major-event-button" type="button" on:click={() => { newLocation_MajorEvents = addToArray(newLocation_MajorEvents, (document.getElementById('newItem_majorEvents') as HTMLInputElement)?.value || ''); (document.getElementById('newItem_majorEvents') as HTMLInputElement).value = '' }}>Add</button>
                         </div>
                         <div class="array-list theme-list">
@@ -1047,7 +1054,7 @@
                 <!--+ Buttons -->
 
                 <div class="button-container">
-                    <button class="create-object-button" type="button" on:click={() => createObject(event, objectType)}>Create</button>
+                    <button class="create-object-button" type="button" on:click={() => console.log('Create object:', objectType)}>Create</button>
                 </div>
             </div>
         </form>

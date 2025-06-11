@@ -1,0 +1,20 @@
+/* DMS Chest - Master CSS File */
+
+/* 1. CSS Variables and Theme System */
+@import './variables.css';
+
+/* 2. Global Resets and Base Styles */
+@import './global.css';
+
+/* 3. Layout System (Grid-based sidebar + main content) */
+@import './layout.css';
+
+/* 4. All Component Styles */
+@import './components.css';
+/* ^ Includes: tool-grid, tool-cards, dropdowns, forms, generators, tab-content */
+
+/* 5. Tab-specific Styles */
+@import './tabs.css';
+
+/* 6. Dialog Styles */
+@import './dialogs.css'; 

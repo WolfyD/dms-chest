@@ -1,9 +1,8 @@
 <script lang="ts">
   import PortalHost from 'svelte-portal';
   import { onMount, onDestroy } from 'svelte';
-  // This layout will be applied to all pages
-  import '$lib/styles/global.css';
-  import '$lib/styles/tabs.css';
+  // This layout will be applied to all pages - unified CSS system
+  import '$lib/styles/index.css';
   import Footer from '$lib/components/layout/Footer.svelte';
   import Header from '$lib/components/layout/Header.svelte';
   import { initHeightAdjustment } from '$lib/utils/ui';

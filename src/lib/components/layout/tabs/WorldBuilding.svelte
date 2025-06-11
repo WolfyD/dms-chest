@@ -1,5 +1,5 @@
 <script lang="ts">
-    import '$lib/styles/tab-content.css';
+    // Styles now imported via unified CSS system
     import WorldGenerator from '$lib/components/tools/world-generator/WorldGenerator.svelte';
 </script>
 

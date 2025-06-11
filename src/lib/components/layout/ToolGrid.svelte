@@ -2,9 +2,9 @@
     import { activeTab, categories } from '$lib/stores/tabStore';
     import { get_id_from_string } from '$lib/utils/string';
     import { openTool } from '$lib/utils/ui';
-    import '$lib/styles/tool-grid.css';
+    // Styles now imported via unified CSS system
 
-    $: currentCategory = categories[$activeTab];
+    $: currentCategory = categories[$activeTab as keyof typeof categories];
 </script>
 
 <div class="tool-grid">
@@ -13,7 +13,7 @@
         <p>{currentCategory.description}</p>
         <div class="tools-container">
             {#each currentCategory.tools as [tool, description, longDescription]}
-                <button class="tool-card" id={get_id_from_string(tool)} data-tool={tool} onclick={() => openTool(get_id_from_string(tool), longDescription)} tabindex="0">
+                <button class="tool-card" id={get_id_from_string(tool)} data-tool={tool} onclick={() => openTool(get_id_from_string(tool), longDescription, get_id_from_string(tool))} tabindex="0">
                     <h3>{tool}</h3>
                     <p>{description}</p>
                 </button>
