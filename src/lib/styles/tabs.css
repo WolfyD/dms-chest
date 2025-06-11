@@ -93,6 +93,7 @@
     box-shadow: 2px 2px 2px 0 rgba(233, 206, 206, 0.2);
     padding-bottom: 50px;
     position: absolute;
+    z-index: 1;
 }
 
 #new-campaign-dialog form .campaign-form-container {

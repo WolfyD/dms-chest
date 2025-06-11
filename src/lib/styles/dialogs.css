@@ -227,11 +227,11 @@ p {
 }
 
 /* Portal Dialog Styles */
-.create_object_dialog {
-    position: fixed;
+#create_object_dialog {
+    position: absolute;
+    width: 40%;
     top: calc(10% - 21px);
-    left: calc(10% - 21px);
-    width: 80%;
+    left: calc(30% - 21px);
     height: 80%;
     padding: 20px;
     border: 1px solid var(--color-primary);
@@ -240,19 +240,19 @@ p {
     margin: 0;
     background-color: var(--color-bg-primary);
     overflow-y: hidden;
-    z-index: 1000;
+    z-index: 99999;
 }
 
-.create_object_dialog .form-container {
+#create_object_dialog .form-container {
     overflow-y: scroll;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    height: 65vh;
+    height: 70vh;
 }
 
-.create_object_dialog .button-container {
+#create_object_dialog .button-container {
     display: flex;
     position: absolute;
     bottom: 0;
@@ -266,7 +266,13 @@ p {
     margin-top: 20px;
 }
 
-.create_object_dialog .create-object-button {
+
+#create_object_dialog i {
+    z-index: 1001 !important;
+    right: -10px !important;
+}
+
+#create_object_dialog .create-object-button {
     width: 40%;
     display: block;
     background-color: #444;
@@ -278,68 +284,87 @@ p {
     transition: var(--transition-default) !important;
 }
 
-.create_object_dialog .create-object-button:hover {
+#create_object_dialog .create-object-button:hover {
     background-color: var(--color-primary);
     color: var(--color-bg-primary);
     transition: var(--transition-default) !important;
 }
 
-.create_object_dialog .dialog-input {
-    width: 68%;
+ #create_object_dialog .dialog-input {
+    width: 88%;
     margin-bottom: 10px;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius-md);
     border: 1px solid var(--color-primary);
     margin-left: 50% !important;
     transform: translateX(-50%) !important;
+    background-color: var(--color-bg-secondary) !important;
 }
 
-.create_object_dialog .formline-container {
+#create_object_dialog .formline-container {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 90% !important;
     height: 100%;
     justify-content: stretch;
-    z-index: 1000;
+    z-index: 1004;
     margin-bottom: 10px;
     align-items: center;
 }
 
-.create_object_dialog .formline-container label {
+#create_object_dialog .formline-container label {
     width: 16%;
     cursor: pointer;
     margin-left: 10px;
+    color: var(--color-text-primary) !important;
 }
 
-.create_object_dialog .formline-container input {
-    width: 80%;
-    margin-left: 50% !important;
+#create_object_dialog .formline-container input {
+    width: 100% !important;
+    margin-left: 55% !important;
     transform: translateX(-50%) !important;
 }
 
-.create_object_dialog textarea {
+#create_object_dialog .suggestions-list {
+    width: 100% !important;
+    margin-left: 55% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000;
+    /* still not in front of other elements */
+
+}
+
+#create_object_dialog textarea {
     min-height: 100px;
     resize: vertical;
 }
 
-.create_object_dialog .formline-container input[type="checkbox"] {
-    width: 32px;
-    height: 32px;
-    margin-left: 16% !important;
+#create_object_dialog .formline-container input[type="checkbox"] {
+    width: 32px !important;
+    height: 32px !important;
+    margin-left: 6% !important;
     transform: translateX(-50%) !important;
 }
 
-.create_object_dialog .location-type-dropdown {
+#create_object_dialog .location-type-dropdown {
     width: 72%;
     margin-left: 50% !important;
     transform: translateX(-50%) !important;
+}
+
+#create_object_dialog .new-location-location-type-dropdown .dropdown-list {
+    width: 100% !important;
+    margin-left: 0% !important;
+    transform: translateX(0%) !important;
+    height: 350px !important;
+    max-height: 350px !important;
 }
 
 #newItem_locationName {
     font-size: 1.3em;
 }
 
-.create_object_dialog .array-container {
+#create_object_dialog .array-container {
     width: 72%;
     margin-left: 50% !important;
     transform: translateX(-50%) !important;

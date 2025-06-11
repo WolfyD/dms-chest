@@ -41,9 +41,8 @@ export function resetDialogForm(dialogId: string): void {
  * @param objectType - The type of object to create (Location, World, Calendar, etc.)
  */
 export function showCreateObjectDialog(objectType: string): void {
-    // This function would need to be implemented based on the specific dialog system
-    console.log(`Opening create dialog for ${objectType}`);
-    // For now, we'll just log the action - implementation would depend on the dialog structure
+    document.getElementById('create_object_dialog')?.showModal();
+    $: objectType = objectType;
 }
 
 // Helper functions for common object creation dialogs

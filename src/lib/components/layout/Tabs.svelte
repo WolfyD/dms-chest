@@ -639,7 +639,7 @@
                     externalSuggestions={worldSuggestions}
                     forceShowSuggestions={showWorldSuggestions}
                 />
-                <button class="circle-button add-world-button" title="Add new World" type="button" on:click={() => { addWorld(); }}>+</button>
+                <button class="circle-button add-world-button" title="Add new World" type="button" on:click={() => { objectType = 'World'; addWorld(); }}>+</button>
             </div>
 
             <div class="separator"></div>
@@ -702,7 +702,7 @@
                         externalSuggestions={locationSuggestions}
                         forceShowSuggestions={showLocationSuggestions}
                     />
-                    <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { addLocation(); }}>+</button>
+                    <button class="circle-button add-location-button" title="Add new Location" type="button" on:click={() => { objectType = 'Location'; addLocation(); }}>+</button>
                 </div>
             </div>
 
@@ -814,8 +814,8 @@
     </form>
 </dialog>
 
-<Portal target="body">
-    <div class="create_object_dialog hidden">
+<!--! Create Object Dialog -->
+    <dialog class="create_object_dialog" id="create_object_dialog">
         <h2>Create {objectType}</h2>
         <form on:submit|preventDefault={handleCreateObjectSubmit}>
             <div class="form-container">
@@ -827,7 +827,7 @@
                     <!--+ World -->
                     <div class="formline-container">
                         <AutocompleteInput
-                            class_name="world-autocomplete-container"
+                            class_name="autocomplete-container world-autocomplete-container"
                             searchFn={getWorlds}
                             on:click={async () => { 
                                 const count = await countReturnedObject(checkWorldCount());
@@ -854,7 +854,7 @@
                     {#if !createLocation_LocationIsRoot}
                     <div class="formline-container">
                         <AutocompleteInput
-                            class_name="world-autocomplete-container"
+                            class_name="autocomplete-container world-autocomplete-container"
                             searchFn={getLocations}
                             on:click={async () => { 
                                 const count = await countReturnedObject(checkLocationCount());
@@ -877,6 +877,7 @@
                             value={locationType}
                             placeholder="Select a location type"
                             on:change={handleLocationTypeChange}    
+                            class_name="new-location-location-type-dropdown"
                         />
                     </div>
 
@@ -1060,8 +1061,7 @@
 
 
         
-    </div>
-</Portal>
+    </dialog>
 
 <style>
     .campaign-dropdown {
