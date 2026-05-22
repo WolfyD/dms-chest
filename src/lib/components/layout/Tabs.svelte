@@ -854,7 +854,7 @@
                     {#if !createLocation_LocationIsRoot}
                     <div class="formline-container">
                         <AutocompleteInput
-                            class_name="autocomplete-container world-autocomplete-container"
+                            class_name="world-autocomplete-container"
                             searchFn={getLocations}
                             on:click={async () => { 
                                 const count = await countReturnedObject(checkLocationCount());
